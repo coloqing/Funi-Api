@@ -13,5 +13,8 @@ public class Program
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseStartup<Startup>(); // 指定 Startup 类  
+            }).ConfigureLogging(logging =>
+            {
+                logging.AddConsole(); // 添加控制台提供者
             });
 }

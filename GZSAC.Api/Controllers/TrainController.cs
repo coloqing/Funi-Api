@@ -445,8 +445,8 @@ namespace GZSAC.Controllers
             {
                 cxh = g.FirstOrDefault()?.cxh,
                 jz1kswd = Math.Round(g.Average(x => x.jz1kswd),1),
-                kssdz = g.Average(x => x.kssdz),
-                jz1co2nd = g.Average(x => x.jz1co2nd),
+                kssdz = Math.Round(g.Average(x => x.kssdz),1),
+                jz1co2nd = Math.Round(g.Average(x => x.jz1co2nd),1),
                 create_time = g.Key
 
             }).ToList();
@@ -455,6 +455,160 @@ namespace GZSAC.Controllers
             result.Data = group;
             return result;
         }
+
+
+        /// <summary>
+        /// 通过属性获取折线图数据
+        /// </summary>
+        /// <param name="cxh">车厢号</param>
+        /// <param name="jz">机组</param>
+        /// <param name="code">关键数据Code，多选用，分隔</param>
+        /// <param name="startTime"></param>
+        /// <param name="endTime"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        [HttpGet]
+        [Route("GetTrainLineInfo")]
+        public async Task<AjaxResult<List<TB_PARSING_NEWDATAS>>> GetTrainLineInfo(string cxh, string? jz, string? startTime, string? endTime, string? code = "jz1kswd,kssdz,jz1co2nd")
+        {
+            var result = new AjaxResult<List<TB_PARSING_NEWDATAS>>();
+
+            if (string.IsNullOrEmpty(cxh))
+            {
+                throw new Exception("车厢号不能为空");
+            }
+
+            string wheresql = "";
+
+            if (!string.IsNullOrEmpty(jz))
+            {
+                wheresql += " and yxtzjid = " + jz + "";
+            }
+            if (!string.IsNullOrEmpty(startTime))
+            {
+                wheresql += " and create_time >= '" + startTime + "'";
+            }
+            if (!string.IsNullOrEmpty(endTime))
+            {
+                wheresql += " and create_time < '" + endTime + "'";
+            }
+
+            string sql = $"select lch,create_time,yxtzjid,cxh,{code} " +
+                        " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
+                        " where cxh='{0}'{1}" +
+                        " order by create_time";
+            sql = string.Format(sql, cxh, wheresql);
+
+            var data = await _db.SqlQueryable<TB_PARSING_NEWDATAS>(sql).ToListAsync();
+
+            var group = data.GroupBy(x => (Convert.ToDateTime(x.create_time).ToString("yyyy-MM-dd HH:mm"))).Select(g => new TB_PARSING_NEWDATAS
+            {
+                cxh = g.First().cxh,
+                jz1kswd = Math.Round(g.Average(x => x.jz1kswd),1),
+                kssdz = (int)g.Average(x => x.kssdz),
+                jz1co2nd = (int)g.Average(x => x.jz1co2nd),
+                jz1mbwd = Math.Round(g.Average(y => y.jz1mbwd), 1),
+                jz1swwd = Math.Round(g.Average(z => z.jz1swwd), 1),
+                jz1kswdcgq1wd = Math.Round(g.Average(x => x.jz1kswdcgq1wd), 1),
+                jz1sfcgq1wd = Math.Round(g.Average(x => x.jz1sfcgq1wd), 1),
+                jz1sfcgq2wd = Math.Round(g.Average(x => x.jz1sfcgq2wd), 1),
+                jz1ysj1pqwd = Math.Round(g.Average(x => x.jz1ysj1pqwd), 1),
+                jz1ysj2pqwd = Math.Round(g.Average(x => x.jz1ysj2pqwd), 1),
+                jz1ysj1xqwd = Math.Round(g.Average(x => x.jz1ysj1xqwd), 1),
+                jz1ysj2xqwd = Math.Round(g.Average(x => x.jz1ysj2xqwd), 1),
+                jz1kqzljcmkwd = Math.Round(g.Average(x => x.jz1kqzljcmkwd), 1),
+                jz1pm2d5nd = (int)g.Average(x => x.jz1pm2d5nd),
+                jz1tvocnd = (int)g.Average(x => x.jz1tvocnd),
+                jz1xff1kd = (int)g.Average(x => x.jz1xff1kd),
+                jz1xff2kd = (int)g.Average(x => x.jz1xff2kd),
+                jz1hff1kd = (int)g.Average(x => x.jz1hff1kd),
+                jz1hff2kd = (int)g.Average(x => x.jz1hff2kd),
+                jz1ysj1gyyl = (int)g.Average(x => x.jz1ysj1gyyl),
+                jz1ysj1dyyl = (int)g.Average(x => x.jz1ysj1dyyl),
+                jz1ysj2gyyl = (int)g.Average(x => x.jz1ysj2gyyl),
+                jz1ysj2dyyl = (int)g.Average(x => x.jz1ysj2dyyl),
+                jz1lwylz = (int)g.Average(x => x.jz1lwylz),
+                jz1tfj1uxdlz = Math.Round(g.Average(x => x.jz1tfj1uxdlz), 1),
+                jz1tfj1vxdlz = Math.Round(g.Average(x => x.jz1tfj1vxdlz), 1),
+                jz1tfj1wxdlz = Math.Round(g.Average(x => x.jz1tfj1wxdlz), 1),
+                jz1tfj2uxdlz = Math.Round(g.Average(x => x.jz1tfj2uxdlz), 1),
+                jz1tfj2vxdlz = Math.Round(g.Average(x => x.jz1tfj2vxdlz), 1),
+                jz1tfj2wxdlz = Math.Round(g.Average(x => x.jz1tfj2wxdlz), 1),
+                jz1lnfj1uxdlz = Math.Round(g.Average(x => x.jz1lnfj1uxdlz), 1),
+                jz1lnfj1vxdlz = Math.Round(g.Average(x => x.jz1lnfj1vxdlz), 1),
+                jz1lnfj1wxdlz = Math.Round(g.Average(x => x.jz1lnfj1wxdlz), 1),
+                jz1lnfj2uxdlz = Math.Round(g.Average(x => x.jz1lnfj2uxdlz), 1),
+                jz1lnfj2vxdlz = Math.Round(g.Average(x => x.jz1lnfj2vxdlz), 1),
+                jz1lnfj2wxdlz = Math.Round(g.Average(x => x.jz1lnfj2wxdlz), 1),
+                jz1ysj1uxdlz = Math.Round(g.Average(x => x.jz1ysj1uxdlz), 1),
+                jz1ysj1vxdlz = Math.Round(g.Average(x => x.jz1ysj1vxdlz), 1),
+                jz1ysj1wxdlz = Math.Round(g.Average(x => x.jz1ysj1wxdlz), 1),
+                jz1ysj2uxdlz = Math.Round(g.Average(x => x.jz1ysj2uxdlz), 1),
+                jz1ysj2vxdlz = Math.Round(g.Average(x => x.jz1ysj2vxdlz), 1),
+                jz1ysj2wxdlz = Math.Round(g.Average(x => x.jz1ysj2wxdlz), 1),
+                jz1ysj1pl = (int)g.Average(x => x.jz1ysj1pl),
+                jz1ysj2pl = (int)g.Average(x => x.jz1ysj2pl),
+                jz1bpq1gl = Math.Round(g.Average(x => x.jz1bpq1gl),1),
+                jz1bpq2gl = Math.Round(g.Average(x => x.jz1bpq2gl), 1),
+                jz1bpq1scdy = Math.Round(g.Average(x => x.jz1bpq1scdy), 1),
+                jz1bpq2scdy = Math.Round(g.Average(x => x.jz1bpq2scdy), 1),
+                jz1ktnh = (int)g.Average(x => x.jz1ktnh),
+                create_time = Convert.ToDateTime(g.Key)
+
+            }).ToList();
+
+            result.Data = group;
+            return result;
+        }
+
+        /// <summary>
+        /// 折线图数据导出
+        /// </summary>
+        /// <param name="cxh">车厢号</param>
+        /// <param name="jz">机组</param>
+        /// <param name="startTime">开始时间</param>
+        /// <param name="endTime">结束时间</param>
+        /// <param name="code">关键参数</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("GetLineData/excel")]
+        public async Task<IActionResult> LineDataExcel(string cxh, string? jz, string? startTime, string? endTime, string? code = "jz1kswd,kssdz,jz1co2nd")
+        {
+            try
+            {
+                string rptTitle = "折线图数据导出";
+                ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
+                ExcelUtil.Instance().AliasDataSource.Clear();
+                var data = await GetTrainLineInfo(cxh, jz, startTime, endTime, code);
+                var dataTable = data.Data.ToDataTable(); // 确保 ToDataTable() 方法存在或正确实现  
+                dataTable.TableName = "LineData";
+                //{ rptTitle}
+                //_{ DateTime.Now}
+
+                // 调用 Save 方法获取 MemoryStream  
+                using (var stream = ExcelUtil.Instance().Save(dataTable, "折线图数据导出模板"))
+                {
+                    byte[] excelBytes = new byte[stream.Length];
+                    stream.Read(excelBytes, 0, excelBytes.Length);
+
+                    // 设置文件名  
+                    string fileName = rptTitle + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
+
+                    // 返回文件给客户端  
+                    return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                // 记录错误或处理异常  
+                // 例如，可以使用日志记录器记录异常  
+                _logger.LogError(ex, "Error occurred while generating Excel file.");
+
+                throw new Exception(ex.ToString());
+            }
+        }
+
 
         /// <summary>
         /// 获取空调机组关键数据

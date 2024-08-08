@@ -27,9 +27,11 @@ namespace SAC.Util
             {
                 try
                 {
-                    string json = "{ \"success\":true,\"result_msg\":\"操作成功！\",\"result_code\":\"200\",\"result_data\":[{ \"line_code\":\"GZML7S\",\"miles\":0,\"total_train_num\":19,\"online_train_num\":0,\"depot_train_num\":0,\"offline_train_num\":11,\"fault_train_num\":11,\"fault_num\":118,\"online_trains\":[\"07073074\"],\"depot_trains\":[],\"offline_trains\":[\"07073074\",\"07075076\",\"07077078\",\"07079080\",\"07081082\",\"07083084\",\"07085086\",\"07087088\",\"07089090\",\"07091092\",\"07093094\",\"07095096\",\"07097098\",\"07099100\",\"07101102\",\"07103104\",\"07105106\",\"07107108\",\"07109110\"],\"fault_trains\":[\"07073074\",\"07077078\",\"07079080\",\"07081082\",\"07083084\",\"07085086\",\"07087088\",\"07089090\",\"07091092\",\"07095096\",\"07101102\"]}]}";
 
+                    //测试数据
+                    string json = "{\r\n    \"success\": true,\r\n    \"result_msg\": \"操作成功！\",\r\n    \"result_code\": \"200\",\r\n    \"result_data\": [\r\n        {\r\n            \"line_code\": \"GZML7S\",\r\n            \"miles\": 0,\r\n            \"total_train_num\": 19,\r\n            \"online_train_num\": 2,\r\n            \"depot_train_num\": 4,\r\n            \"offline_train_num\": 5,\r\n            \"fault_train_num\": 11,\r\n            \"fault_num\": 130,\r\n            \"online_trains\": [\r\n                \"07073074\",\r\n                \"07083084\"\r\n            ],\r\n            \"depot_trains\": [\r\n                \"07077078\",\r\n                \"07081082\",\r\n                \"07087088\",\r\n                \"07089090\"\r\n            ],\r\n            \"offline_trains\": [\r\n                \"07075076\",\r\n                \"07079080\",\r\n                \"07085086\",\r\n                \"07091092\",\r\n                \"07093094\",\r\n                \"07095096\",\r\n                \"07097098\",\r\n                \"07099100\",\r\n                \"07101102\",\r\n                \"07103104\",\r\n                \"07105106\",\r\n                \"07107108\",\r\n                \"07109110\"\r\n            ],\r\n            \"fault_trains\": [\r\n                \"07073074\",\r\n                \"07077078\",\r\n                \"07079080\",\r\n                \"07081082\",\r\n                \"07083084\",\r\n                \"07085086\",\r\n                \"07087088\",\r\n                \"07089090\",\r\n                \"07091092\",\r\n                \"07095096\",\r\n                \"07101102\"\r\n            ]\r\n        }\r\n    ]\r\n}";
                     return DeserializeJson<T>(json);
+
                     // 发送GET请求
                     HttpResponseMessage response = await client.GetAsync(url);
 
@@ -38,8 +40,6 @@ namespace SAC.Util
 
                     // 读取响应内容
                     string responseBody = await response.Content.ReadAsStringAsync();
-
-                    
 
                     return DeserializeJson<T>(responseBody);
                 }

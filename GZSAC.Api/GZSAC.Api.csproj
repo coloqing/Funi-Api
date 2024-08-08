@@ -21,6 +21,9 @@
     <None Update="ExcelTemplate\关键数据导出模板.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="ExcelTemplate\折线图数据导出模板.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="ExcelTemplate\故障预警导出模板.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

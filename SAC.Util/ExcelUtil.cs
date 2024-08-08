@@ -70,6 +70,7 @@ namespace SAC.Util
         /// </summary>
         public ExcelUtil()
         {
+            //_filePath = AppContext.BaseDirectory;
             _filePath = Directory.GetCurrentDirectory();
             _templateFilePath = Path.Combine(_filePath, "ExcelTemplate");
             //LoadLicense(_filePath);
