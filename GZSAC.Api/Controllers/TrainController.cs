@@ -746,6 +746,8 @@ namespace GZSAC.Controllers
                 RunLife = x.RunLife,
                 RatedLife = x.RatedLife,
                 SurplusLife = (x.RatedLife) - (x.RunLife ?? 0),
+                createtime = x.createtime,
+                updatetime = x.updatetime
                 //Percent = (decimal?)((x.RunLife ?? 0)/(decimal?)x.RatedLife)
 
             }).ToListAsync();
@@ -948,14 +950,14 @@ namespace GZSAC.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("GetFaultWarn/excel")]
-        public async Task<IActionResult> FaultWarnExcel(string? lch, string? cxh, string? jz, string? type, string sortFile = "createtime", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
+        public async Task<IActionResult> FaultWarnExcel(string? lch, string? cxh, string? jz, string? type, string? startTime, string? endTime, string sortFile = "createtime", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
         {
             try
             {
                 string rptTitle = "故障预警导出";
                 ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
                 ExcelUtil.Instance().AliasDataSource.Clear();
-                var data = await GetFaultWarn(lch, cxh, jz, type, sortFile, sortType, null,null,pageIndex, pageRow);
+                var data = await GetFaultWarn(lch, cxh, "", type, startTime, endTime, sortFile, sortType,pageIndex, pageRow);
                 var dataTable = data.Data.ToDataTable(); // 确保 ToDataTable() 方法存在或正确实现  
                 dataTable.TableName = "FaultWarn";
                 //{ rptTitle}
@@ -1147,7 +1149,7 @@ namespace GZSAC.Controllers
                 //_{ DateTime.Now}
 
                 // 调用 Save 方法获取 MemoryStream  
-                using (var stream = ExcelUtil.Instance().Save(dataTable, "部件寿命导出"))
+                using (var stream = ExcelUtil.Instance().Save(dataTable, "部件寿命导出模板"))
                 {
 
                     byte[] excelBytes = new byte[stream.Length];
