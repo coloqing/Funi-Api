@@ -90,7 +90,7 @@ namespace GZSAC.Controllers
                         item.State = 1;
                     }                
                 }
-                result.Data = data;
+                result.Data = data.OrderBy(x =>x.lch).ToList();
                 return result;
             }
             else
@@ -444,7 +444,7 @@ namespace GZSAC.Controllers
             var group = data.GroupBy(x => (Convert.ToDateTime(x.create_time).ToString("yyyy-MM-dd HH:mm"))).Select(g => new TrainCarriageDTO
             {
                 cxh = g.FirstOrDefault()?.cxh,
-                jz1kswd = g.Average(x => x.jz1kswd),
+                jz1kswd = Math.Round(g.Average(x => x.jz1kswd),1),
                 kssdz = g.Average(x => x.kssdz),
                 jz1co2nd = g.Average(x => x.jz1co2nd),
                 create_time = g.Key
