@@ -759,6 +759,8 @@ namespace GZSAC.Controllers
                 RunLife = x.RunLife,
                 RatedLife = x.RatedLife,
                 SurplusLife = (x.RatedLife) - (x.RunLife ?? 0),
+                createtime = x.createtime,
+                updatetime = x.updatetime
                 //Percent = (decimal?)((x.RunLife ?? 0)/(decimal?)x.RatedLife)
 
             }).ToListAsync();
