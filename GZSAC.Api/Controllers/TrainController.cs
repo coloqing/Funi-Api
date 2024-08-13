@@ -451,7 +451,6 @@ namespace GZSAC.Controllers
 
             }).ToList();
 
-
             result.Data = group;
             return result;
         }
@@ -497,6 +496,14 @@ namespace GZSAC.Controllers
                         " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
                         " where cxh='{0}'{1}" +
                         " order by create_time";
+
+            if (string.IsNullOrEmpty(code))
+            {
+                sql = $"select * " +
+                       " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
+                       " where cxh='{0}'{1}" +
+                       " order by create_time";
+            }
             sql = string.Format(sql, cxh, wheresql);
 
             var data = await _db.SqlQueryable<TB_PARSING_NEWDATAS>(sql).ToListAsync();
@@ -711,7 +718,7 @@ namespace GZSAC.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("GetPartsLife")]
-        public async Task<PageResult<PartsLifeDTO>> GetPartsLife(string? lch, string? cxh, string? jz, string? name, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
+        public async Task<PageResult<PartsLifeDTO>> GetPartsLife(string? lch, string? cxh, string? jz, string? name, string? gzbj, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
         {
             var q = _db.Queryable<PartsLife>();
 
@@ -728,8 +735,14 @@ namespace GZSAC.Controllers
                 q = q.Where(a => a.WZ == Convert.ToInt32(jz));
             }
             if (!string.IsNullOrEmpty(name))
-            {
+            {               
                 q = q.Where(a => a.Name == name);
+            }
+            if (!string.IsNullOrEmpty(gzbj))
+            {
+                var dicname = _db.Queryable<TB_SYS_DIC>().Where(x => x.ParentId == "1001" && x.Code == gzbj).First().Name;
+
+                q = q.Where(a => a.Name == dicname);
             }
 
             var data = await q.Select(x => new PartsLifeDTO
@@ -756,7 +769,8 @@ namespace GZSAC.Controllers
             {
                 if (item.RatedLife != 0) // 假设RatedLife不应为0以避免除以零错误  
                 {
-                    item.Percent = item.RunLife / (decimal?)item.RatedLife;
+                    item.Percent = Math.Round((decimal)((item.RunLife * 100) / item.RatedLife), 1);
+                    item.RunLife = Math.Round((decimal)item.RunLife, 1);
                 }
             }
 
@@ -948,14 +962,14 @@ namespace GZSAC.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("GetFaultWarn/excel")]
-        public async Task<IActionResult> FaultWarnExcel(string? lch, string? cxh, string? jz, string? type, string sortFile = "createtime", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
+        public async Task<IActionResult> FaultWarnExcel(string? lch, string? cxh, string? jz, string? type, string? startTime, string? endTime, string sortFile = "createtime", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
         {
             try
             {
-                string rptTitle = "故障预警导出";
+                string rptTitle = "故障预警导出模板";
                 ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
                 ExcelUtil.Instance().AliasDataSource.Clear();
-                var data = await GetFaultWarn(lch, cxh, jz, type, sortFile, sortType, null,null,pageIndex, pageRow);
+                var data = await GetFaultWarn(lch, cxh, jz, type, startTime, endTime, sortFile, sortType,pageIndex, pageRow);
                 var dataTable = data.Data.ToDataTable(); // 确保 ToDataTable() 方法存在或正确实现  
                 dataTable.TableName = "FaultWarn";
                 //{ rptTitle}
@@ -1133,21 +1147,21 @@ namespace GZSAC.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("GetPartsLife/excel")]
-        public async Task<IActionResult> PartsLifeExcel(string? lch, string? cxh, string? jz, string? name, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
+        public async Task<IActionResult> PartsLifeExcel(string? lch, string? cxh, string? jz, string? name, string? gzbj, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
         {
             try
             {
                 string rptTitle = "部件寿命导出";
                 ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
                 ExcelUtil.Instance().AliasDataSource.Clear();
-                var data = await GetPartsLife(lch, cxh, jz, name, sortFile, sortType, pageIndex, pageRow);
+                var data = await GetPartsLife(lch, cxh, jz, name, gzbj,sortFile, sortType, pageIndex, pageRow);
                 var dataTable = data.Data.ToDataTable(); // 确保 ToDataTable() 方法存在或正确实现  
                 dataTable.TableName = "PartsLife";
                 //{ rptTitle}
                 //_{ DateTime.Now}
 
                 // 调用 Save 方法获取 MemoryStream  
-                using (var stream = ExcelUtil.Instance().Save(dataTable, "部件寿命导出"))
+                using (var stream = ExcelUtil.Instance().Save(dataTable, "部件寿命导出模板"))
                 {
 
                     byte[] excelBytes = new byte[stream.Length];

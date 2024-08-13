@@ -31,8 +31,6 @@ namespace GZSAC.Api.DTO
         
         public string? CX { get; set; }
 
-       
-
         /// <summary>
         /// 部件位置名称
         /// </summary>           
@@ -44,8 +42,6 @@ namespace GZSAC.Api.DTO
 
         public string? Name { get; set; }
 
-       
-
         /// <summary>
         /// 类型
         /// </summary>           
@@ -55,19 +51,19 @@ namespace GZSAC.Api.DTO
         /// 已耗寿命/次数
         /// </summary>           
 
-        public int? RunLife { get; set; }
+        public decimal? RunLife { get; set; }
 
         /// <summary>
         /// 额定寿命/次数
         /// </summary>           
         
-        public int? RatedLife { get; set; }
+        public decimal? RatedLife { get; set; }
 
         /// <summary>
         /// 剩余寿命/次数
         /// </summary>           
         
-        public int? SurplusLife { get; set; }
+        public decimal? SurplusLife { get; set; }
 
         /// <summary>
         /// 百分比

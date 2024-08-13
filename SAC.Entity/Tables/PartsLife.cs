@@ -55,19 +55,19 @@ namespace SAC.Entity
         /// 已耗寿命/次数
         /// </summary>           
         [SugarColumn(ColumnDescription = "已耗寿命/次数")]
-        public int? RunLife { get; set; }
+        public decimal? RunLife { get; set; }
 
         /// <summary>
         /// 额定寿命/次数
         /// </summary>           
         [SugarColumn(ColumnDescription = "额定寿命/次数")]
-        public int? RatedLife { get; set; }
+        public decimal? RatedLife { get; set; }
 
         /// <summary>
         /// 剩余寿命/次数
         /// </summary>           
         [SugarColumn(ColumnDescription = "剩余寿命/次数")]
-        public int? SurplusLife { get; set; }
+        public decimal? SurplusLife { get; set; }
 
         /// <summary>
         /// 百分比
