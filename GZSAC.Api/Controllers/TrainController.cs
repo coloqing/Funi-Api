@@ -123,7 +123,7 @@ namespace GZSAC.Controllers
 	                            dbo.FaultOrWarn AS f
 	                            ON a.device_code = f.DeviceCode
                             WHERE 
-                                f.State = '1'
+                                f.State = '0'
                                     ";
 
             var data = await _db.SqlQueryable<TrainStaDTO>(sql).ToListAsync();
