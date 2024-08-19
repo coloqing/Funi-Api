@@ -386,7 +386,7 @@ namespace GZSAC.Controllers
                 }
             }
 
-            data.jz1kswd = Math.Round(data.jz1kswd / num, 1);
+            data.jz1kswd = Math.Round(data.jz1kswd / num, 1) - (decimal)2.5;
             data.jz1swwd = Math.Round(data.jz1swwd / num, 1);
             data.jz1mbwd = Math.Round(data.jz1mbwd / num, 1);
             data.jz1co2nd = Math.Round(data.jz1co2nd / num, 1);
@@ -451,7 +451,7 @@ namespace GZSAC.Controllers
             var group = data.GroupBy(x => (Convert.ToDateTime(x.create_time).ToString("yyyy-MM-dd HH:mm"))).Select(g => new TrainCarriageDTO
             {
                 cxh = g.FirstOrDefault()?.cxh,
-                jz1kswd = Math.Round(g.Average(x => x.jz1kswd),1),
+                jz1kswd = Math.Round(g.Average(x => x.jz1kswd),1) - (decimal)2.5,
                 kssdz = Math.Round(g.Average(x => x.kssdz),1),
                 jz1co2nd = Math.Round(g.Average(x => x.jz1co2nd),1),
                 create_time = g.Key
@@ -518,7 +518,7 @@ namespace GZSAC.Controllers
             var group = data.GroupBy(x => (Convert.ToDateTime(x.create_time).ToString("yyyy-MM-dd HH:mm"))).Select(g => new TB_PARSING_NEWDATAS
             {
                 cxh = g.First().cxh,
-                jz1kswd = Math.Round(g.Average(x => x.jz1kswd),1),
+                jz1kswd = Math.Round(g.Average(x => x.jz1kswd),1) - 2.5,
                 kssdz = (int)g.Average(x => x.kssdz),
                 jz1co2nd = (int)g.Average(x => x.jz1co2nd),
                 jz1mbwd = Math.Round(g.Average(y => y.jz1mbwd), 1),
