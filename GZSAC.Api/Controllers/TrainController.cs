@@ -18,7 +18,6 @@ using System.IO;
 using GZSAC.Api.DTO.OldDTO;
 using System.Collections;
 using AutoMapper;
-using SAC.Entity.DTO;
 
 namespace GZSAC.Controllers
 {
@@ -391,7 +390,7 @@ namespace GZSAC.Controllers
             data.jz1mbwd = Math.Round(data.jz1mbwd / num, 1);
             data.jz1co2nd = Math.Round(data.jz1co2nd / num, 1);
             data.kssdz = Math.Round(data.kssdz / num, 1);
-            data.cxh = q.First().cxh;
+            data.cxh = cxh;
             result.Data = data;
 
             return result;
