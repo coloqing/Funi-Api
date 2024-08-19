@@ -1,4 +1,5 @@
-﻿using SAC.Util;
+﻿using SAC.Entity.DTO;
+using SAC.Util;
 using SqlSugar;
 
 namespace SAC.Entity

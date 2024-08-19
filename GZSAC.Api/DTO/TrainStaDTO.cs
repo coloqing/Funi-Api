@@ -8,6 +8,7 @@
         public string yxtzjid { get; set; }
         public string State { get; set; }
         public string FaultState { get; set; }
+        public DateTime createtime { get; set; }
     }
 
 

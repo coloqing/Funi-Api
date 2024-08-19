@@ -17,6 +17,8 @@ using System.Net;
 using System.IO;
 using GZSAC.Api.DTO.OldDTO;
 using System.Collections;
+using AutoMapper;
+using SAC.Entity.DTO;
 
 namespace GZSAC.Controllers
 {
@@ -29,15 +31,18 @@ namespace GZSAC.Controllers
         private readonly AppSettings _appSettings;
 
         private readonly ILogger<TrainController> _logger;
+        private readonly IMapper _mapper;
 
         public TrainController(
             ILogger<TrainController> logger,
             SqlSugarClient db,
+            IMapper mapper,
             AppSettings appSettings)
         {
             _logger = logger;
             _db = db;
             _appSettings = appSettings;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -110,20 +115,22 @@ namespace GZSAC.Controllers
         public async Task<AjaxResult<List<TrainStaDTO>>> GetTrainSta(string? lch)
         {
             var resultData = new AjaxResult<List<TrainStaDTO>>();
-            string sql = @"SELECT
-	                            a.lch, 
-	                            a.cxh, 
-	                            a.device_code, 
-	                            a.yxtzjid,                               
-                                f.State AS FaultState,
-	                            COALESCE(f.Type, a.State) AS State 
-                            FROM
-	                            dbo.TB_PARSING_NEWDATAS AS a
-	                            LEFT JOIN
-	                            dbo.FaultOrWarn AS f
-	                            ON a.device_code = f.DeviceCode
-                            WHERE 
-                                f.State = '1'
+            string sql = @"SELECT  
+                                a.lch,   
+                                a.cxh,   
+                                a.device_code,   
+                                a.yxtzjid,   
+                                f.State AS FaultState,   
+                                COALESCE(f.Type, 0) AS State,   
+                                f.createtime  
+                            FROM  
+                                dbo.TB_PARSING_NEWDATAS AS a  
+                            LEFT JOIN  
+                                dbo.FaultOrWarn AS f  
+                            ON   
+                                a.device_code = f.DeviceCode  
+                                AND f.State = '1'  
+                                AND CAST(f.createtime AS DATE) = CAST(GETDATE() AS DATE)
                                     ";
 
             var data = await _db.SqlQueryable<TrainStaDTO>(sql).ToListAsync();
@@ -628,64 +635,7 @@ namespace GZSAC.Controllers
         public async Task<AjaxResult<TrainKeyDTO>> GetDeviceData(string cxh, string? jz)
         {
             var result = new AjaxResult<TrainKeyDTO>();
-            string sql = @"SELECT
-	                        a.lch, 
-	                        a.cxh, 
-	                        a.yxtzjid, 
-	                        a.jz1mbwd, 
-	                        a.jz1kswd, 
-	                        a.jz1swwd, 
-	                        a.jz1kswdcgq1wd, 
-	                        a.jz1sfcgq1wd, 
-	                        a.jz1sfcgq2wd, 
-	                        a.jz1ysj1pqwd, 
-	                        a.jz1ysj2pqwd, 
-	                        a.jz1ysj1xqwd, 
-	                        a.jz1ysj2xqwd, 
-	                        a.jz1kqzljcmkwd, 
-	                        a.jz1co2nd, 
-	                        a.jz1pm2d5nd, 
-	                        a.kssdz, 
-	                        a.jz1tvocnd, 
-	                        a.jz1kssdz, 
-	                        a.jz1xff1kd, 
-	                        a.jz1xff2kd, 
-	                        a.jz1hff1kd, 
-	                        a.jz1hff2kd, 
-	                        a.jz1ysj1gyyl, 
-	                        a.jz1ysj1dyyl, 
-	                        a.jz1ysj2gyyl, 
-	                        a.jz1ysj2dyyl, 
-	                        a.jz1lwylz, 
-	                        a.jz1tfj1uxdlz, 
-	                        a.jz1tfj1vxdlz, 
-	                        a.jz1tfj1wxdlz, 
-	                        a.jz1tfj2uxdlz, 
-	                        a.jz1tfj2vxdlz, 
-	                        a.jz1tfj2wxdlz, 
-	                        a.jz1lnfj1uxdlz, 
-	                        a.jz1lnfj1vxdlz, 
-	                        a.jz1lnfj1wxdlz, 
-	                        a.jz1lnfj2uxdlz, 
-	                        a.jz1lnfj2vxdlz, 
-	                        a.jz1lnfj2wxdlz, 
-	                        a.jz1ysj1uxdlz, 
-	                        a.jz1ysj1vxdlz, 
-	                        a.jz1ysj1wxdlz, 
-	                        a.jz1ysj2uxdlz, 
-	                        a.jz1ysj2vxdlz, 
-	                        a.jz1ysj2wxdlz, 
-	                        a.jz1ysj1pl, 
-	                        a.jz1ysj2pl, 
-	                        a.jz1bpq1gl, 
-	                        a.jz1bpq2gl, 
-	                        a.jz1bpq1scdy, 
-	                        a.jz1bpq2scdy, 
-	                        a.jz1ktnh, 
-	                        a.jz1zhl1ldlz, 
-	                        a.jz1zhl2ldlz, 
-	                        a.ktkzms, 
-	                        a.tfms, 
+            string sql = @"SELECT a.* ,	                       
 	                        dic.Name AS tfmsName
                         FROM
 	                        dbo.TB_PARSING_NEWDATAS AS a
