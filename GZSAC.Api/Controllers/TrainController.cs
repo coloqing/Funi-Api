@@ -18,6 +18,7 @@ using System.IO;
 using GZSAC.Api.DTO.OldDTO;
 using System.Collections;
 using AutoMapper;
+using SqlSugar.Extensions;
 
 namespace GZSAC.Controllers
 {
@@ -26,11 +27,15 @@ namespace GZSAC.Controllers
     public class TrainController : ControllerBase
     {
         private readonly SqlSugarClient _db;
-
         private readonly AppSettings _appSettings;
-
         private readonly ILogger<TrainController> _logger;
         private readonly IMapper _mapper;
+        private  string appId;
+        private  string appKey;
+        private  string baseUrl;
+        private  string lineCode;
+
+
 
         public TrainController(
             ILogger<TrainController> logger,
@@ -42,6 +47,10 @@ namespace GZSAC.Controllers
             _db = db;
             _appSettings = appSettings;
             _mapper = mapper;
+            appId = _appSettings.AppId;
+            appKey = _appSettings.AppKey;
+            baseUrl = _appSettings.BaseUrl;
+            lineCode = _appSettings.LineCode;
         }
 
         /// <summary>
@@ -65,11 +74,9 @@ namespace GZSAC.Controllers
             //result.Data = data;
             //return result;
 
-            string appId = _appSettings.AppId;
-            string appKey = _appSettings.AppKey;
-            string baseUrl = _appSettings.BaseUrl;
+           
             string urlType = "line-statistics";
-            string lineCode = _appSettings.LineCode;
+            
 
             // 构建app_token
             string appToken = $"app_id={appId}&app_key={appKey}&date=" + DateTime.Now.ToString("yyyy-MM-dd");
@@ -244,7 +251,7 @@ namespace GZSAC.Controllers
                 q = q.Where(a => a.yxtzjid == Convert.ToInt32(jz));
             }
 
-            return await q.GetPageResultAsync(sortFile, sortType, 1, 20);
+            return await q.GetPageResultAsync(sortFile, sortType, pageIndex, pageRow);
 
         }
 
@@ -439,10 +446,10 @@ namespace GZSAC.Controllers
                 cloum = code;
             }
 
-            string sql = "select jz1kswd,kssdz,jz1co2nd,create_time,yxtzjid,cxh " +
+            string sql = "select jz1kswd,kssdz,jz1co2nd,rq as create_time,yxtzjid,cxh " +
                         " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
                         " where cxh='{0}'{1}" +
-                        " order by create_time";
+                        " order by rq";
             sql = string.Format(sql, cxh, wheresql);
 
             var data = await _db.SqlQueryable<TrainCarriageDTO>(sql).ToListAsync();
@@ -498,23 +505,23 @@ namespace GZSAC.Controllers
                 wheresql += " and create_time < '" + endTime + "'";
             }
 
-            string sql = $"select lch,create_time,yxtzjid,cxh,{code} " +
+            string sql = $"select lch,rq as rq,yxtzjid,cxh,{code} " +
                         " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
                         " where cxh='{0}'{1}" +
-                        " order by create_time";
+                        " order by rq";
 
             if (string.IsNullOrEmpty(code))
             {
                 sql = $"select * " +
                        " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
                        " where cxh='{0}'{1}" +
-                       " order by create_time";
+                       " order by rq";
             }
             sql = string.Format(sql, cxh, wheresql);
 
             var data = await _db.SqlQueryable<TB_PARSING_NEWDATAS>(sql).ToListAsync();
 
-            var group = data.GroupBy(x => (Convert.ToDateTime(x.create_time).ToString("yyyy-MM-dd HH:mm"))).Select(g => new TB_PARSING_NEWDATAS
+            var group = data.GroupBy(x => (Convert.ToDateTime(x.rq).ToString("yyyy-MM-dd HH:mm"))).Select(g => new TB_PARSING_NEWDATAS
             {
                 cxh = g.First().cxh,
                 jz1kswd = Math.Round(g.Average(x => x.jz1kswd),1) - 2.5,
@@ -841,6 +848,38 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
+        /// 获取智能运维平台故障列表
+        /// </summary>
+        /// <param name="lch"></param>
+        /// <param name="cxh"></param>
+        /// <param name="jz"></param>
+        /// <param name="type"></param>
+        /// <param name="startTime"></param>
+        /// <param name="endTime"></param>
+        /// <param name="sortFile"></param>
+        /// <param name="sortType"></param>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageRow"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetHttpFaultWarn")]
+        public async Task<HttpReq<HttpWarnResp>> GetHttpFaultWarn(string? lch, string? cxh, string? jz, string? type, string? startTime, string? endTime, int pageIndex = 1, int pageRow = 20)
+        {
+            string urlType = "train-warn";
+            // 构建app_token
+            string appToken = $"app_id={appId}&app_key={appKey}&date=" + DateTime.Now.ToString("yyyy-MM-dd");
+            string tokenMd5 = Helper.GetMD5String(appToken).ToUpper();
+
+            string url = $"{baseUrl}{urlType}?app_id={appId}&app_token={tokenMd5}&line_code={lineCode}&system_code=HVAC" +
+                $"&train_code={lch}&coach_no={cxh}&fault_type={type}&begin_time={startTime}&end_time={endTime}&page={pageIndex}&page_size={pageRow}";
+
+            var httpWarnRes = await HttpClientExample.SendGetRequestAsync<HttpReq<HttpWarnResp>>(url);
+
+            return httpWarnRes;
+
+        }
+
+        /// <summary>
         /// 获取故障预警详细信息
         /// </summary>
         /// <param name="id"></param>
@@ -1009,7 +1048,6 @@ namespace GZSAC.Controllers
                 if (!string.IsNullOrEmpty(endTime))
                 {
                     wheresql += " and f.createtime < '" + endTime + "'";
-
                 }
             }
 
@@ -1072,8 +1110,8 @@ namespace GZSAC.Controllers
 
             var fault = new FaultWarnNum() 
             { 
-                SubHealthNum = warnNum.Where(x => x.State == "0").Select(x => x.DeviceCode).Distinct().Count(),
-                UnHealthNum = faultNum.Where(x => x.State == "0").Select(x => x.DeviceCode).Distinct().Count(),
+                SubHealthNum = warnNum.Where(x => x.State == "1").Select(x => x.DeviceCode).Distinct().Count(),
+                UnHealthNum = faultNum.Where(x => x.State == "1").Select(x => x.DeviceCode).Distinct().Count(),
                 WarnSum = warnNum.Count(),
                 FaultSum = faultNum.Count(),
             };
@@ -1158,6 +1196,59 @@ namespace GZSAC.Controllers
                 ExcelUtil.Instance().AliasDataSource.Clear();
                 var data = await GetParesData(lch, cxh, jz, sortFile, sortType, pageIndex, pageRow);
                 var dataTable = data.Data.ToDataTable(); // 确保 ToDataTable() 方法存在或正确实现  
+                dataTable.TableName = "ParesData";
+                //{ rptTitle}
+                //_{ DateTime.Now}
+
+                // 调用 Save 方法获取 MemoryStream  
+                using (var stream = ExcelUtil.Instance().Save(dataTable, "关键数据导出模板"))
+                {
+
+                    byte[] excelBytes = new byte[stream.Length];
+                    stream.Read(excelBytes, 0, excelBytes.Length);
+
+                    // 设置文件名  
+                    string fileName = rptTitle + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
+
+                    // 返回文件给客户端  
+                    return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                // 记录错误或处理异常  
+                // 例如，可以使用日志记录器记录异常  
+                _logger.LogError(ex, "Error occurred while generating Excel file.");
+
+                // 返回一个错误响应  
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the Excel file.");
+            }
+        }
+
+        /// <summary>
+        /// 通过ID获取故障信息前后10分钟数据
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("GetFaultToExcel")]
+        public async Task<IActionResult> GetFaultToExcel(int? id)
+        {
+            try
+            {
+                string rptTitle = "故障实时数据导出";
+                ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
+                ExcelUtil.Instance().AliasDataSource.Clear();
+                var q = await _db.Queryable<FaultOrWarn>().FirstAsync(x => x.Id == id);
+
+                var time = Convert.ToDateTime(q.createtime);
+                var startTime = time.AddMinutes(-10);
+                var endTime = time.AddMinutes(10);
+                var tabletime = time.ToString("yyyyMMdd");
+                var sql = $@"select * from TB_PARSING_DATAS_{tabletime}";
+                var data = _db.SqlQueryable<TB_PARSING_DATAS>(sql).Where(x => x.device_code == q.DeviceCode && x.create_time >= startTime && x.create_time <= endTime); 
+                var dataTable = data.ToDataTable(); // 确保 ToDataTable() 方法存在或正确实现  
                 dataTable.TableName = "ParesData";
                 //{ rptTitle}
                 //_{ DateTime.Now}
