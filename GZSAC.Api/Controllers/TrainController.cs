@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+ï»¿using Microsoft.AspNetCore.Mvc;
 using SAC.Entity;
 using SqlSugar;
 using subway_airConditioner;
@@ -54,7 +54,7 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
-        /// »ñÈ¡·ÖÎöÏµÍ³ÁĞ³µÍ³¼ÆÊı¾İ
+        /// è·å–åˆ†æç³»ç»Ÿåˆ—è½¦ç»Ÿè®¡æ•°æ®
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -78,7 +78,7 @@ namespace GZSAC.Controllers
             string urlType = "line-statistics";
             
 
-            // ¹¹½¨app_token
+            // æ„å»ºapp_token
             string appToken = $"app_id={appId}&app_key={appKey}&date=" + DateTime.Now.ToString("yyyy-MM-dd");
             string tokenMd5 = Helper.GetMD5String(appToken).ToUpper();
             string url = $"{baseUrl}{urlType}?app_id={appId}&app_token={tokenMd5}&line_code={lineCode}";
@@ -113,7 +113,7 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
-        /// »ñÈ¡ÁĞ³µ×´Ì¬Êı¾İ
+        /// è·å–åˆ—è½¦çŠ¶æ€æ•°æ®
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -162,7 +162,7 @@ namespace GZSAC.Controllers
                 {
                     lch = group.Key,
                     State = group.Any(dto => dto.State == "2") ? "2" :
-                      (group.Any(dto => dto.State == "1") ? "1" : "0") // Èç¹ûÃ»ÓĞ1»ò2£¬ÔòÄ¬ÈÏÎª¿Õ×Ö·û´®»òÄãÖ¸¶¨µÄÖµ  
+                      (group.Any(dto => dto.State == "1") ? "1" : "0") // å¦‚æœæ²¡æœ‰1æˆ–2ï¼Œåˆ™é»˜è®¤ä¸ºç©ºå­—ç¬¦ä¸²æˆ–ä½ æŒ‡å®šçš„å€¼  
                 }).ToList();
             }
 
@@ -171,7 +171,7 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
-        /// »ñÈ¡·Ö×éÊı¾İ
+        /// è·å–åˆ†ç»„æ•°æ®
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -201,7 +201,7 @@ namespace GZSAC.Controllers
                     CxhGroups = g.GroupBy(x => x.cxh)
                     .Select(cg => new CxhGroup(cg.Key)
                     {
-                        YxtzjidList = cg.Select(dto => new JZ() { Jz = dto.yxtzjid, JzName = dto.yxtzjid == "1" ? "»ú×é1" : "»ú×é2" }).ToList()
+                        YxtzjidList = cg.Select(dto => new JZ() { Jz = dto.yxtzjid, JzName = dto.yxtzjid == "1" ? "æœºç»„1" : "æœºç»„2" }).ToList()
                     }).ToList()
                 }).ToList();
 
@@ -211,7 +211,7 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
-        /// ³õÊ¼»¯±í
+        /// åˆå§‹åŒ–è¡¨
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -221,13 +221,13 @@ namespace GZSAC.Controllers
             _db.CodeFirst.InitTables<FaultOrWarn>();
             return new AjaxResult<string>()
             {
-                Message = "±í½á¹¹³õÊ¼»¯³É¹¦"
+                Message = "è¡¨ç»“æ„åˆå§‹åŒ–æˆåŠŸ"
             };
         }
 
 
         /// <summary>
-        /// »ñÈ¡¹Ø¼üÊı¾İ·ÖÒ³ĞÅÏ¢
+        /// è·å–å…³é”®æ•°æ®åˆ†é¡µä¿¡æ¯
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -256,7 +256,7 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
-        /// »ñÈ¡·ÖÒ³Éè±¸Êı¾İ(²âÊÔ)
+        /// è·å–åˆ†é¡µè®¾å¤‡æ•°æ®(æµ‹è¯•)
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -347,9 +347,9 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
-        /// »ñÈ¡³µÏáÊı¾İÆ½¾ùÖµ
+        /// è·å–è½¦å¢æ•°æ®å¹³å‡å€¼
         /// </summary>
-        /// <param name="cxh">³µÏáºÅ</param>
+        /// <param name="cxh">è½¦å¢å·</param>
         /// <returns></returns>
         [HttpGet]
         [Route("GetTrainCarriage")]
@@ -406,11 +406,11 @@ namespace GZSAC.Controllers
 
 
         /// <summary>
-        /// »ñÈ¡ÕÛÏßÍ¼Êı¾İ
+        /// è·å–æŠ˜çº¿å›¾æ•°æ®
         /// </summary>
-        /// <param name="cxh">³µÏáºÅ</param>
-        /// <param name="jz">»ú×é</param>
-        /// <param name="code">¹Ø¼üÊı¾İCode£¬¶àÑ¡ÓÃ£¬·Ö¸ô</param>
+        /// <param name="cxh">è½¦å¢å·</param>
+        /// <param name="jz">æœºç»„</param>
+        /// <param name="code">å…³é”®æ•°æ®Codeï¼Œå¤šé€‰ç”¨ï¼Œåˆ†éš”</param>
         /// <param name="startTime"></param>
         /// <param name="endTime"></param>
         /// <returns></returns>
@@ -424,7 +424,7 @@ namespace GZSAC.Controllers
             string cloum = "";
             if (string.IsNullOrEmpty(cxh))
             {
-                throw new Exception("³µÏáºÅ²»ÄÜÎª¿Õ");
+                throw new Exception("è½¦å¢å·ä¸èƒ½ä¸ºç©º");
             }
             string wheresql = "";
 
@@ -470,11 +470,11 @@ namespace GZSAC.Controllers
 
 
         /// <summary>
-        /// Í¨¹ıÊôĞÔ»ñÈ¡ÕÛÏßÍ¼Êı¾İ
+        /// é€šè¿‡å±æ€§è·å–æŠ˜çº¿å›¾æ•°æ®
         /// </summary>
-        /// <param name="cxh">³µÏáºÅ</param>
-        /// <param name="jz">»ú×é</param>
-        /// <param name="code">¹Ø¼üÊı¾İCode£¬¶àÑ¡ÓÃ£¬·Ö¸ô</param>
+        /// <param name="cxh">è½¦å¢å·</param>
+        /// <param name="jz">æœºç»„</param>
+        /// <param name="code">å…³é”®æ•°æ®Codeï¼Œå¤šé€‰ç”¨ï¼Œåˆ†éš”</param>
         /// <param name="startTime"></param>
         /// <param name="endTime"></param>
         /// <returns></returns>
@@ -487,7 +487,7 @@ namespace GZSAC.Controllers
 
             if (string.IsNullOrEmpty(cxh))
             {
-                throw new Exception("³µÏáºÅ²»ÄÜÎª¿Õ");
+                throw new Exception("è½¦å¢å·ä¸èƒ½ä¸ºç©º");
             }
 
             string wheresql = "";
@@ -582,13 +582,125 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
-        /// ÕÛÏßÍ¼Êı¾İµ¼³ö
+        /// é€šè¿‡å±æ€§è·å–æŠ˜çº¿å›¾æ•°æ®
         /// </summary>
-        /// <param name="cxh">³µÏáºÅ</param>
-        /// <param name="jz">»ú×é</param>
-        /// <param name="startTime">¿ªÊ¼Ê±¼ä</param>
-        /// <param name="endTime">½áÊøÊ±¼ä</param>
-        /// <param name="code">¹Ø¼ü²ÎÊı</param>
+        /// <param name="cxh">è½¦å¢å·</param>
+        /// <param name="jz">æœºç»„</param>
+        /// <param name="code">å…³é”®æ•°æ®Codeï¼Œå¤šé€‰ç”¨ï¼Œåˆ†éš”</param>
+        /// <param name="startTime"></param>
+        /// <param name="endTime"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        [HttpGet]
+        [Route("GetTrainLineRawInfo")]
+        public async Task<AjaxResult<List<TB_PARSING_NEWDATAS>>> GetTrainLineRawInfo(string cxh, string? jz, string? startTime, string? endTime, string? code = "jz1kswd,kssdz,jz1co2nd")
+        {
+            var result = new AjaxResult<List<TB_PARSING_NEWDATAS>>();
+
+            if (string.IsNullOrEmpty(cxh))
+            {
+                throw new Exception("ï¿½ï¿½ï¿½ï¿½Å²ï¿½ï¿½ï¿½Îªï¿½ï¿½");
+            }
+
+            string wheresql = "";
+
+            if (!string.IsNullOrEmpty(jz))
+            {
+                wheresql += " and yxtzjid = " + jz + "";
+            }
+            if (!string.IsNullOrEmpty(startTime))
+            {
+                wheresql += " and create_time >= '" + startTime + "'";
+            }
+            if (!string.IsNullOrEmpty(endTime))
+            {
+                wheresql += " and create_time < '" + endTime + "'";
+            }
+
+            string sql = $"select lch,create_time,yxtzjid,cxh,{code} " +
+                        " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
+                        " where cxh='{0}'{1}" +
+                        " order by create_time";
+
+            if (string.IsNullOrEmpty(code))
+            {
+                sql = $"select * " +
+                       " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
+                       " where cxh='{0}'{1}" +
+                       " order by create_time";
+            }
+            sql = string.Format(sql, cxh, wheresql);
+
+            var data = await _db.SqlQueryable<TB_PARSING_NEWDATAS>(sql).ToListAsync();
+
+            var group = data.Select(x => new TB_PARSING_NEWDATAS
+            {
+                cxh = x.cxh,
+                jz1kswd = Math.Round(x.jz1kswd, 1) - 2.5,
+                kssdz = (int)x.kssdz,
+                jz1co2nd = (int)x.jz1co2nd,
+                jz1mbwd = Math.Round(x.jz1mbwd, 1),
+                jz1swwd = Math.Round(x.jz1swwd, 1),
+                jz1kswdcgq1wd = Math.Round(x.jz1kswdcgq1wd, 1),
+                jz1sfcgq1wd = Math.Round(x.jz1sfcgq1wd, 1),
+                jz1sfcgq2wd = Math.Round(x.jz1sfcgq2wd, 1),
+                jz1ysj1pqwd = Math.Round(x.jz1ysj1pqwd, 1),
+                jz1ysj2pqwd = Math.Round(x.jz1ysj2pqwd, 1),
+                jz1ysj1xqwd = Math.Round(x.jz1ysj1xqwd, 1),
+                jz1ysj2xqwd = Math.Round(x.jz1ysj2xqwd, 1),
+                jz1kqzljcmkwd = Math.Round(x.jz1kqzljcmkwd, 1),
+                jz1pm2d5nd = (int)x.jz1pm2d5nd,
+                jz1tvocnd = (int)x.jz1tvocnd,
+                jz1xff1kd = (int)x.jz1xff1kd,
+                jz1xff2kd = (int)x.jz1xff2kd,
+                jz1hff1kd = (int)x.jz1hff1kd,
+                jz1hff2kd = (int)x.jz1hff2kd,
+                jz1ysj1gyyl = (int)x.jz1ysj1gyyl,
+                jz1ysj1dyyl = (int)x.jz1ysj1dyyl,
+                jz1ysj2gyyl = (int)x.jz1ysj2gyyl,
+                jz1ysj2dyyl = (int)x.jz1ysj2dyyl,
+                jz1lwylz = (int)x.jz1lwylz,
+                jz1tfj1uxdlz = Math.Round(x.jz1tfj1uxdlz, 1),
+                jz1tfj1vxdlz = Math.Round(x.jz1tfj1vxdlz, 1),
+                jz1tfj1wxdlz = Math.Round(x.jz1tfj1wxdlz, 1),
+                jz1tfj2uxdlz = Math.Round(x.jz1tfj2uxdlz, 1),
+                jz1tfj2vxdlz = Math.Round(x.jz1tfj2vxdlz, 1),
+                jz1tfj2wxdlz = Math.Round(x.jz1tfj2wxdlz, 1),
+                jz1lnfj1uxdlz = Math.Round(x.jz1lnfj1uxdlz, 1),
+                jz1lnfj1vxdlz = Math.Round(x.jz1lnfj1vxdlz, 1),
+                jz1lnfj1wxdlz = Math.Round(x.jz1lnfj1wxdlz, 1),
+                jz1lnfj2uxdlz = Math.Round(x.jz1lnfj2uxdlz, 1),
+                jz1lnfj2vxdlz = Math.Round(x.jz1lnfj2vxdlz, 1),
+                jz1lnfj2wxdlz = Math.Round(x.jz1lnfj2wxdlz, 1),
+                jz1ysj1uxdlz = Math.Round(x.jz1ysj1uxdlz, 1),
+                jz1ysj1vxdlz = Math.Round(x.jz1ysj1vxdlz, 1),
+                jz1ysj1wxdlz = Math.Round(x.jz1ysj1wxdlz, 1),
+                jz1ysj2uxdlz = Math.Round(x.jz1ysj2uxdlz, 1),
+                jz1ysj2vxdlz = Math.Round(x.jz1ysj2vxdlz, 1),
+                jz1ysj2wxdlz = Math.Round(x.jz1ysj2wxdlz, 1),
+                jz1ysj1pl = (int)x.jz1ysj1pl,
+                jz1ysj2pl = (int)x.jz1ysj2pl,
+                jz1bpq1gl = Math.Round(x.jz1bpq1gl, 1),
+                jz1bpq2gl = Math.Round(x.jz1bpq2gl, 1),
+                jz1bpq1scdy = Math.Round(x.jz1bpq1scdy, 1),
+                jz1bpq2scdy = Math.Round(x.jz1bpq2scdy, 1),
+                jz1ktnh = (int)x.jz1ktnh,
+                create_time = x.create_time
+
+            }).ToList();
+
+            result.Data = group;
+            return result;
+        }
+
+        /// <summary>
+        /// æŠ˜çº¿å›¾æ•°æ®å¯¼å‡º
+        /// </summary>
+        /// <param name="cxh">è½¦å¢å·</param>
+        /// <param name="jz">æœºç»„</param>
+        /// <param name="startTime">å¼€å§‹æ—¶é—´</param>
+        /// <param name="endTime">ç»“æŸæ—¶é—´</param>
+        /// <param name="code">å…³é”®å‚æ•°</param>
         /// <returns></returns>
         [HttpPost]
         [Route("GetLineData/excel")]
@@ -596,33 +708,33 @@ namespace GZSAC.Controllers
         {
             try
             {
-                string rptTitle = "ÕÛÏßÍ¼Êı¾İµ¼³ö";
+                string rptTitle = "æŠ˜çº¿å›¾æ•°æ®å¯¼å‡º";
                 ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
                 ExcelUtil.Instance().AliasDataSource.Clear();
                 var data = await GetTrainLineInfo(cxh, jz, startTime, endTime, code);
-                var dataTable = data.Data.ToDataTable(); // È·±£ ToDataTable() ·½·¨´æÔÚ»òÕıÈ·ÊµÏÖ  
+                var dataTable = data.Data.ToDataTable(); // ç¡®ä¿ ToDataTable() æ–¹æ³•å­˜åœ¨æˆ–æ­£ç¡®å®ç°  
                 dataTable.TableName = "LineData";
                 //{ rptTitle}
                 //_{ DateTime.Now}
 
-                // µ÷ÓÃ Save ·½·¨»ñÈ¡ MemoryStream  
-                using (var stream = ExcelUtil.Instance().Save(dataTable, "ÕÛÏßÍ¼Êı¾İµ¼³öÄ£°å"))
+                // è°ƒç”¨ Save æ–¹æ³•è·å– MemoryStream  
+                using (var stream = ExcelUtil.Instance().Save(dataTable, "æŠ˜çº¿å›¾æ•°æ®å¯¼å‡ºæ¨¡æ¿"))
                 {
                     byte[] excelBytes = new byte[stream.Length];
                     stream.Read(excelBytes, 0, excelBytes.Length);
 
-                    // ÉèÖÃÎÄ¼şÃû  
+                    // è®¾ç½®æ–‡ä»¶å  
                     string fileName = rptTitle + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
 
-                    // ·µ»ØÎÄ¼ş¸ø¿Í»§¶Ë  
+                    // è¿”å›æ–‡ä»¶ç»™å®¢æˆ·ç«¯  
                     return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
 
                 }
             }
             catch (Exception ex)
             {
-                // ¼ÇÂ¼´íÎó»ò´¦ÀíÒì³£  
-                // ÀıÈç£¬¿ÉÒÔÊ¹ÓÃÈÕÖ¾¼ÇÂ¼Æ÷¼ÇÂ¼Òì³£  
+                // è®°å½•é”™è¯¯æˆ–å¤„ç†å¼‚å¸¸  
+                // ä¾‹å¦‚ï¼Œå¯ä»¥ä½¿ç”¨æ—¥å¿—è®°å½•å™¨è®°å½•å¼‚å¸¸  
                 _logger.LogError(ex, "Error occurred while generating Excel file.");
 
                 throw new Exception(ex.ToString());
@@ -631,10 +743,10 @@ namespace GZSAC.Controllers
 
 
         /// <summary>
-        /// »ñÈ¡¿Õµ÷»ú×é¹Ø¼üÊı¾İ
+        /// è·å–ç©ºè°ƒæœºç»„å…³é”®æ•°æ®
         /// </summary>
-        /// <param name="cxh">³µÏáºÅ</param>
-        /// <param name="jz">»ú×é</param>
+        /// <param name="cxh">è½¦å¢å·</param>
+        /// <param name="jz">æœºç»„</param>
         /// <returns></returns>
         [HttpGet]
         [Route("GetDeviceData")]
@@ -661,16 +773,16 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
-        /// »ñÈ¡ÊÙÃü·ÖÒ³ĞÅÏ¢
+        /// è·å–å¯¿å‘½åˆ†é¡µä¿¡æ¯
         /// </summary>
-        /// <param name="lch">ÁĞ³µºÅ</param>
-        /// <param name="cxh">³µÏáºÅ</param>
-        /// <param name="jz">»ú×é</param>
-        /// <param name="name">ÊÙÃü²¿¼şÃû³Æ</param>
+        /// <param name="lch">åˆ—è½¦å·</param>
+        /// <param name="cxh">è½¦å¢å·</param>
+        /// <param name="jz">æœºç»„</param>
+        /// <param name="name">å¯¿å‘½éƒ¨ä»¶åç§°</param>
         /// <param name="sortFile"></param>
         /// <param name="sortType"></param>
-        /// <param name="pageIndex">Ò³Êı</param>
-        /// <param name="pageRow">Ã¿Ò³ĞĞÊı</param>
+        /// <param name="pageIndex">é¡µæ•°</param>
+        /// <param name="pageRow">æ¯é¡µè¡Œæ•°</param>
         /// <returns></returns>
         [HttpGet]
         [Route("GetPartsLife")]
@@ -709,9 +821,9 @@ namespace GZSAC.Controllers
                 CH = x.CH,
                 CX = x.CX,
                 WZ = x.WZ,
-                WZName = x.WZ == 1 ? "»ú×é1" : "»ú×é2",
+                WZName = x.WZ == 1 ? "æœºç»„1" : "æœºç»„2",
                 Type = x.Type,
-                TypeName = x.Type == "H" ? "Ê±³¤(Ğ¡Ê±)" : "´ÎÊı",
+                TypeName = x.Type == "H" ? "æ—¶é•¿(å°æ—¶)" : "æ¬¡æ•°",
                 RunLife = x.RunLife,
                 RatedLife = x.RatedLife,
                 SurplusLife = (x.RatedLife) - (x.RunLife ?? 0),
@@ -725,14 +837,14 @@ namespace GZSAC.Controllers
 
             foreach (var item in data)
             {
-                if (item.RatedLife != 0) // ¼ÙÉèRatedLife²»Ó¦Îª0ÒÔ±ÜÃâ³ıÒÔÁã´íÎó  
+                if (item.RatedLife != 0) // å‡è®¾RatedLifeä¸åº”ä¸º0ä»¥é¿å…é™¤ä»¥é›¶é”™è¯¯  
                 {
                     item.Percent = Math.Round((decimal)((item.RunLife * 100) / item.RatedLife), 1);
                     item.RunLife = Math.Round((decimal)item.RunLife, 1);
                 }
             }
 
-            // Ôö¼Ó²»·ÖÒ³ÅĞ¶Ï
+            // å¢åŠ ä¸åˆ†é¡µåˆ¤æ–­
             if (pageRow <= 0)
             {
                 pageRow = count;
@@ -750,23 +862,23 @@ namespace GZSAC.Controllers
                 Total = count,
                 Success = true,
                 Code = 200,
-                Message = "²éÑ¯³É¹¦"
+                Message = "æŸ¥è¯¢æˆåŠŸ"
             };
         }
 
         /// <summary>
-        /// »ñÈ¡¹ÊÕÏÔ¤¾¯ĞÅÏ¢
+        /// è·å–æ•…éšœé¢„è­¦ä¿¡æ¯
         /// </summary>
-        /// <param name="lch">ÁĞ³µºÅ</param>
-        /// <param name="cxh">³µÏáºÅ</param>
-        /// <param name="jz">»ú×é</param>
-        /// <param name="type">ÀàĞÍ1£º¹ÊÕÏ£¬2£ºÔ¤¾¯</param>
-        /// <param name="endTime">½áÊøÊ±¼ä</param>
-        /// <param name="startTime">¿ªÊ¼Ê±¼ä</param>
+        /// <param name="lch">åˆ—è½¦å·</param>
+        /// <param name="cxh">è½¦å¢å·</param>
+        /// <param name="jz">æœºç»„</param>
+        /// <param name="type">ç±»å‹1ï¼šæ•…éšœï¼Œ2ï¼šé¢„è­¦</param>
+        /// <param name="endTime">ç»“æŸæ—¶é—´</param>
+        /// <param name="startTime">å¼€å§‹æ—¶é—´</param>
         /// <param name="sortFile"></param>
         /// <param name="sortType"></param>
-        /// <param name="pageIndex">Ò³Êı</param>
-        /// <param name="pageRow">Ã¿Ò³ĞĞÊı</param>
+        /// <param name="pageIndex">é¡µæ•°</param>
+        /// <param name="pageRow">æ¯é¡µè¡Œæ•°</param>
         /// <returns></returns>
         [HttpGet]
         [Route("GetFaultWarn")]
@@ -848,7 +960,7 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
-        /// »ñÈ¡ÖÇÄÜÔËÎ¬Æ½Ì¨¹ÊÕÏÁĞ±í
+        /// è·å–æ™ºèƒ½è¿ç»´å¹³å°æ•…éšœåˆ—è¡¨
         /// </summary>
         /// <param name="lch"></param>
         /// <param name="cxh"></param>
@@ -866,7 +978,7 @@ namespace GZSAC.Controllers
         public async Task<HttpReq<HttpWarnResp>> GetHttpFaultWarn(string? lch, string? cxh, string? jz, string? type, string? startTime, string? endTime, int pageIndex = 1, int pageRow = 20)
         {
             string urlType = "train-warn";
-            // ¹¹½¨app_token
+            // æ„å»ºapp_token
             string appToken = $"app_id={appId}&app_key={appKey}&date=" + DateTime.Now.ToString("yyyy-MM-dd");
             string tokenMd5 = Helper.GetMD5String(appToken).ToUpper();
 
@@ -880,7 +992,7 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
-        /// »ñÈ¡¹ÊÕÏÔ¤¾¯ÏêÏ¸ĞÅÏ¢
+        /// è·å–æ•…éšœé¢„è­¦è¯¦ç»†ä¿¡æ¯
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -939,7 +1051,7 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
-        /// ¹ÊÕÏÔ¤¾¯µ¼³öexcel
+        /// æ•…éšœé¢„è­¦å¯¼å‡ºexcel
         /// </summary>
         /// <param name="lch"></param>
         /// <param name="cxh"></param>
@@ -956,62 +1068,67 @@ namespace GZSAC.Controllers
         {
             try
             {
-                string rptTitle = "¹ÊÕÏÔ¤¾¯µ¼³öÄ£°å";
+                string rptTitle = "æ•…éšœé¢„è­¦å¯¼å‡ºæ¨¡æ¿";
                 ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
                 ExcelUtil.Instance().AliasDataSource.Clear();
                 var data = await GetFaultWarn(lch, cxh, jz, type, startTime, endTime, sortFile, sortType,pageIndex, pageRow);
-                var dataTable = data.Data.ToDataTable(); // È·±£ ToDataTable() ·½·¨´æÔÚ»òÕıÈ·ÊµÏÖ  
+                var dataTable = data.Data.ToDataTable(); // ç¡®ä¿ ToDataTable() æ–¹æ³•å­˜åœ¨æˆ–æ­£ç¡®å®ç°  
                 dataTable.TableName = "FaultWarn";
                 //{ rptTitle}
                 //_{ DateTime.Now}
 
-                // µ÷ÓÃ Save ·½·¨»ñÈ¡ MemoryStream  
-                using (var stream = ExcelUtil.Instance().Save(dataTable, "¹ÊÕÏÔ¤¾¯µ¼³öÄ£°å"))
+                // è°ƒç”¨ Save æ–¹æ³•è·å– MemoryStream  
+                using (var stream = ExcelUtil.Instance().Save(dataTable, "æ•…éšœé¢„è­¦å¯¼å‡ºæ¨¡æ¿"))
                 {
 
                     byte[] excelBytes = new byte[stream.Length];
                     stream.Read(excelBytes, 0, excelBytes.Length);
 
-                    // ÉèÖÃÎÄ¼şÃû  
+                    // è®¾ç½®æ–‡ä»¶å  
                     string fileName = rptTitle + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
 
-                    // ·µ»ØÎÄ¼ş¸ø¿Í»§¶Ë  
+                    // è¿”å›æ–‡ä»¶ç»™å®¢æˆ·ç«¯  
                     return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
 
                 }
             }
             catch (Exception ex)
             {
-                // ¼ÇÂ¼´íÎó»ò´¦ÀíÒì³£  
-                // ÀıÈç£¬¿ÉÒÔÊ¹ÓÃÈÕÖ¾¼ÇÂ¼Æ÷¼ÇÂ¼Òì³£  
+                // è®°å½•é”™è¯¯æˆ–å¤„ç†å¼‚å¸¸  
+                // ä¾‹å¦‚ï¼Œå¯ä»¥ä½¿ç”¨æ—¥å¿—è®°å½•å™¨è®°å½•å¼‚å¸¸  
                 _logger.LogError(ex, "Error occurred while generating Excel file.");
 
-                // ·µ»ØÒ»¸ö´íÎóÏìÓ¦  
+                // è¿”å›ä¸€ä¸ªé”™è¯¯å“åº”  
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the Excel file.");
             }
         }
 
 
         /// <summary>
-        /// »ñÈ¡¹ÊÕÏÔ¤¾¯·ÖÀàĞÅÏ¢
+        /// è·å–æ•…éšœé¢„è­¦åˆ†ç±»ä¿¡æ¯
         /// </summary>
-        /// <param name="lch">ÁĞ³µºÅ</param>
+        /// <param name="lch">åˆ—è½¦å·</param>
         /// <returns></returns>
         [HttpGet]
         [Route("GetFaultWarnType")]
-        public async Task<AjaxResult<List<FaultTypeDTO>>> GetFaultWarnType(string? lch, string? type,string? timeType, string? startTime, string? endTime)
+        public async Task<AjaxResult<List<FaultTypeDTO>>> GetFaultWarnType(string? lch, string? cxh, string? type,string? timeType, string? startTime, string? endTime)
         {
 
             string wheresql = "";
 
             if (!string.IsNullOrEmpty(lch))
             {
-                wheresql += " and f.lch = " + lch + "";
+                wheresql += " and f.lch = '" + lch + "'";
+            }
+
+            if (!string.IsNullOrEmpty(cxh))
+            {
+                wheresql += " and f.cxh = '" + cxh + "'";
             }
 
             if (!string.IsNullOrEmpty(type))
             {
-                wheresql += " and f.Type = " + type + "";
+                wheresql += " and f.Type = '" + type + "'";
             }
             if (!string.IsNullOrEmpty(timeType))
             {
@@ -1033,7 +1150,7 @@ namespace GZSAC.Controllers
                         startTime = nowDate.AddMonths(-6).ToString("yyyy-MM-dd HH:mm:ss");
                         break;
                     default:
-                        throw new Exception("Î´ÖªµÄÊ±¼äÀàĞÍ");
+                        throw new Exception("æœªçŸ¥çš„æ—¶é—´ç±»å‹");
                 }
                 wheresql += " and f.createtime >= '" + startTime + "'" + " and f.createtime < '" + endTime + "'";
 
@@ -1087,7 +1204,7 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
-        /// »ñÈ¡¿Õµ÷×´Ì¬ÊıÁ¿
+        /// è·å–ç©ºè°ƒçŠ¶æ€æ•°é‡
         /// </summary>
         /// <param name="lch"></param>
         /// <returns></returns>
@@ -1123,7 +1240,7 @@ namespace GZSAC.Controllers
         }
 
         /// <summary>
-        /// µ¼³öÊÙÃüÊı¾İ
+        /// å¯¼å‡ºå¯¿å‘½æ•°æ®
         /// </summary>
         /// <param name="lch"></param>
         /// <param name="cxh"></param>
@@ -1140,42 +1257,42 @@ namespace GZSAC.Controllers
         {
             try
             {
-                string rptTitle = "²¿¼şÊÙÃüµ¼³ö";
+                string rptTitle = "éƒ¨ä»¶å¯¿å‘½å¯¼å‡º";
                 ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
                 ExcelUtil.Instance().AliasDataSource.Clear();
                 var data = await GetPartsLife(lch, cxh, jz, name, gzbj,sortFile, sortType, pageIndex, pageRow);
-                var dataTable = data.Data.ToDataTable(); // È·±£ ToDataTable() ·½·¨´æÔÚ»òÕıÈ·ÊµÏÖ  
+                var dataTable = data.Data.ToDataTable(); // ç¡®ä¿ ToDataTable() æ–¹æ³•å­˜åœ¨æˆ–æ­£ç¡®å®ç°  
                 dataTable.TableName = "PartsLife";
                 //{ rptTitle}
                 //_{ DateTime.Now}
 
-                // µ÷ÓÃ Save ·½·¨»ñÈ¡ MemoryStream  
-                using (var stream = ExcelUtil.Instance().Save(dataTable, "²¿¼şÊÙÃüµ¼³öÄ£°å"))
+                // è°ƒç”¨ Save æ–¹æ³•è·å– MemoryStream  
+                using (var stream = ExcelUtil.Instance().Save(dataTable, "éƒ¨ä»¶å¯¿å‘½å¯¼å‡ºæ¨¡æ¿"))
                 {
 
                     byte[] excelBytes = new byte[stream.Length];
                     stream.Read(excelBytes, 0, excelBytes.Length);
 
-                    // ÉèÖÃÎÄ¼şÃû  
+                    // è®¾ç½®æ–‡ä»¶å  
                     string fileName = rptTitle + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
 
-                    // ·µ»ØÎÄ¼ş¸ø¿Í»§¶Ë  
+                    // è¿”å›æ–‡ä»¶ç»™å®¢æˆ·ç«¯  
                     return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
 
                 }
             }
             catch (Exception ex)
             {
-                // ¼ÇÂ¼´íÎó»ò´¦ÀíÒì³£  
-                // ÀıÈç£¬¿ÉÒÔÊ¹ÓÃÈÕÖ¾¼ÇÂ¼Æ÷¼ÇÂ¼Òì³£  
+                // è®°å½•é”™è¯¯æˆ–å¤„ç†å¼‚å¸¸  
+                // ä¾‹å¦‚ï¼Œå¯ä»¥ä½¿ç”¨æ—¥å¿—è®°å½•å™¨è®°å½•å¼‚å¸¸  
                 _logger.LogError(ex, "Error occurred while generating Excel file.");
 
-                // ·µ»ØÒ»¸ö´íÎóÏìÓ¦  
+                // è¿”å›ä¸€ä¸ªé”™è¯¯å“åº”  
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the Excel file.");
             }
         }
         /// <summary>
-        /// ¹Ø¼üÊı¾İµ¼³ö
+        /// å…³é”®æ•°æ®å¯¼å‡º
         /// </summary>
         /// <param name="lch"></param>
         /// <param name="cxh"></param>
@@ -1191,43 +1308,43 @@ namespace GZSAC.Controllers
         {
             try
             {
-                string rptTitle = "¹Ø¼üÊı¾İµ¼³ö";
+                string rptTitle = "å…³é”®æ•°æ®å¯¼å‡º";
                 ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
                 ExcelUtil.Instance().AliasDataSource.Clear();
                 var data = await GetParesData(lch, cxh, jz, sortFile, sortType, pageIndex, pageRow);
-                var dataTable = data.Data.ToDataTable(); // È·±£ ToDataTable() ·½·¨´æÔÚ»òÕıÈ·ÊµÏÖ  
+                var dataTable = data.Data.ToDataTable(); // ç¡®ä¿ ToDataTable() æ–¹æ³•å­˜åœ¨æˆ–æ­£ç¡®å®ç°  
                 dataTable.TableName = "ParesData";
                 //{ rptTitle}
                 //_{ DateTime.Now}
 
-                // µ÷ÓÃ Save ·½·¨»ñÈ¡ MemoryStream  
-                using (var stream = ExcelUtil.Instance().Save(dataTable, "¹Ø¼üÊı¾İµ¼³öÄ£°å"))
+                // è°ƒç”¨ Save æ–¹æ³•è·å– MemoryStream  
+                using (var stream = ExcelUtil.Instance().Save(dataTable, "å…³é”®æ•°æ®å¯¼å‡ºæ¨¡æ¿"))
                 {
 
                     byte[] excelBytes = new byte[stream.Length];
                     stream.Read(excelBytes, 0, excelBytes.Length);
 
-                    // ÉèÖÃÎÄ¼şÃû  
+                    // è®¾ç½®æ–‡ä»¶å  
                     string fileName = rptTitle + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
 
-                    // ·µ»ØÎÄ¼ş¸ø¿Í»§¶Ë  
+                    // è¿”å›æ–‡ä»¶ç»™å®¢æˆ·ç«¯  
                     return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
 
                 }
             }
             catch (Exception ex)
             {
-                // ¼ÇÂ¼´íÎó»ò´¦ÀíÒì³£  
-                // ÀıÈç£¬¿ÉÒÔÊ¹ÓÃÈÕÖ¾¼ÇÂ¼Æ÷¼ÇÂ¼Òì³£  
+                // è®°å½•é”™è¯¯æˆ–å¤„ç†å¼‚å¸¸  
+                // ä¾‹å¦‚ï¼Œå¯ä»¥ä½¿ç”¨æ—¥å¿—è®°å½•å™¨è®°å½•å¼‚å¸¸  
                 _logger.LogError(ex, "Error occurred while generating Excel file.");
 
-                // ·µ»ØÒ»¸ö´íÎóÏìÓ¦  
+                // è¿”å›ä¸€ä¸ªé”™è¯¯å“åº”  
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the Excel file.");
             }
         }
 
         /// <summary>
-        /// Í¨¹ıID»ñÈ¡¹ÊÕÏĞÅÏ¢Ç°ºó10·ÖÖÓÊı¾İ
+        /// é€šè¿‡IDè·å–æ•…éšœä¿¡æ¯å‰å10åˆ†é’Ÿæ•°æ®
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -1237,7 +1354,7 @@ namespace GZSAC.Controllers
         {
             try
             {
-                string rptTitle = "¹ÊÕÏÊµÊ±Êı¾İµ¼³ö";
+                string rptTitle = "æ•…éšœå®æ—¶æ•°æ®å¯¼å‡º";
                 ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
                 ExcelUtil.Instance().AliasDataSource.Clear();
                 var q = await _db.Queryable<FaultOrWarn>().FirstAsync(x => x.Id == id);
@@ -1248,33 +1365,33 @@ namespace GZSAC.Controllers
                 var tabletime = time.ToString("yyyyMMdd");
                 var sql = $@"select * from TB_PARSING_DATAS_{tabletime}";
                 var data = _db.SqlQueryable<TB_PARSING_DATAS>(sql).Where(x => x.device_code == q.DeviceCode && x.create_time >= startTime && x.create_time <= endTime); 
-                var dataTable = data.ToDataTable(); // È·±£ ToDataTable() ·½·¨´æÔÚ»òÕıÈ·ÊµÏÖ  
+                var dataTable = data.ToDataTable(); // ç¡®ä¿ ToDataTable() æ–¹æ³•å­˜åœ¨æˆ–æ­£ç¡®å®ç°  
                 dataTable.TableName = "ParesData";
                 //{ rptTitle}
                 //_{ DateTime.Now}
 
-                // µ÷ÓÃ Save ·½·¨»ñÈ¡ MemoryStream  
-                using (var stream = ExcelUtil.Instance().Save(dataTable, "¹Ø¼üÊı¾İµ¼³öÄ£°å"))
+                // è°ƒç”¨ Save æ–¹æ³•è·å– MemoryStream  
+                using (var stream = ExcelUtil.Instance().Save(dataTable, "å…³é”®æ•°æ®å¯¼å‡ºæ¨¡æ¿"))
                 {
 
                     byte[] excelBytes = new byte[stream.Length];
                     stream.Read(excelBytes, 0, excelBytes.Length);
 
-                    // ÉèÖÃÎÄ¼şÃû  
+                    // è®¾ç½®æ–‡ä»¶å  
                     string fileName = rptTitle + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
 
-                    // ·µ»ØÎÄ¼ş¸ø¿Í»§¶Ë  
+                    // è¿”å›æ–‡ä»¶ç»™å®¢æˆ·ç«¯  
                     return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
 
                 }
             }
             catch (Exception ex)
             {
-                // ¼ÇÂ¼´íÎó»ò´¦ÀíÒì³£  
-                // ÀıÈç£¬¿ÉÒÔÊ¹ÓÃÈÕÖ¾¼ÇÂ¼Æ÷¼ÇÂ¼Òì³£  
+                // è®°å½•é”™è¯¯æˆ–å¤„ç†å¼‚å¸¸  
+                // ä¾‹å¦‚ï¼Œå¯ä»¥ä½¿ç”¨æ—¥å¿—è®°å½•å™¨è®°å½•å¼‚å¸¸  
                 _logger.LogError(ex, "Error occurred while generating Excel file.");
 
-                // ·µ»ØÒ»¸ö´íÎóÏìÓ¦  
+                // è¿”å›ä¸€ä¸ªé”™è¯¯å“åº”  
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the Excel file.");
             }
         }
