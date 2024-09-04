@@ -30,10 +30,10 @@ namespace GZSAC.Controllers
         private readonly AppSettings _appSettings;
         private readonly ILogger<TrainController> _logger;
         private readonly IMapper _mapper;
-        private  string appId;
-        private  string appKey;
-        private  string baseUrl;
-        private  string lineCode;
+        private string appId;
+        private string appKey;
+        private string baseUrl;
+        private string lineCode;
 
 
 
@@ -74,9 +74,9 @@ namespace GZSAC.Controllers
             //result.Data = data;
             //return result;
 
-           
+
             string urlType = "line-statistics";
-            
+
 
             // 构建app_token
             string appToken = $"app_id={appId}&app_key={appKey}&date=" + DateTime.Now.ToString("yyyy-MM-dd");
@@ -95,13 +95,13 @@ namespace GZSAC.Controllers
                     {
                         item.State = 2;
                     }
-                   
+
                     if (depot.Contains(item.lch))
                     {
                         item.State = 1;
-                    }                
+                    }
                 }
-                result.Data = data.OrderBy(x =>x.lch).ToList();
+                result.Data = data.OrderBy(x => x.lch).ToList();
                 return result;
             }
             else
@@ -153,7 +153,7 @@ namespace GZSAC.Controllers
                     yxtzjid = group.First().yxtzjid,
                     lch = group.Key,
                     State = group.Any(dto => dto.State == "2") ? "2" :
-                       (group.Any(dto => dto.State == "1") ? "1" : "0") 
+                       (group.Any(dto => dto.State == "1") ? "1" : "0")
                 }).ToList();
             }
             else
@@ -232,11 +232,11 @@ namespace GZSAC.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("GetParesData")]
-        public async Task<PageResult<TB_PARSING_DATAS>> GetParesData(string? lch,string? cxh, string? jz ,string sortFile = "create_time", string sortType = "desc", int pageIndex = 1, int pageRow = 20) 
+        public async Task<PageResult<TB_PARSING_DATAS>> GetParesData(string? lch, string? cxh, string? jz, string sortFile = "create_time", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
         {
             var data = DateTime.Now.ToString("yyyyMMdd");
             var sql = $@"select * from TB_PARSING_DATAS_{data}";
-            var q =  _db.SqlQueryable<TB_PARSING_DATAS>(sql);
+            var q = _db.SqlQueryable<TB_PARSING_DATAS>(sql);
 
             if (!string.IsNullOrEmpty(lch))
             {
@@ -374,7 +374,7 @@ namespace GZSAC.Controllers
 
             for (int i = 0; i < num; i++)
             {
-                
+
                 data.jz1kswd += q[i].jz1kswd;
                 data.jz1swwd += q[i].jz1swwd;
                 data.jz1mbwd += q[i].jz1mbwd;
@@ -417,7 +417,7 @@ namespace GZSAC.Controllers
         /// <exception cref="Exception"></exception>
         [HttpGet]
         [Route("GetTrainLine")]
-        public async Task<AjaxResult<List<TrainCarriageDTO>>> GetTrainLine(string cxh, string? jz, string? code,string? startTime, string? endTime)
+        public async Task<AjaxResult<List<TrainCarriageDTO>>> GetTrainLine(string cxh, string? jz, string? code, string? startTime, string? endTime)
         {
             var result = new AjaxResult<List<TrainCarriageDTO>>();
 
@@ -457,9 +457,9 @@ namespace GZSAC.Controllers
             var group = data.GroupBy(x => (Convert.ToDateTime(x.create_time).ToString("yyyy-MM-dd HH:mm"))).Select(g => new TrainCarriageDTO
             {
                 cxh = g.FirstOrDefault()?.cxh,
-                jz1kswd = Math.Round(g.Average(x => x.jz1kswd),1) - (decimal)2.5,
-                kssdz = Math.Round(g.Average(x => x.kssdz),1),
-                jz1co2nd = Math.Round(g.Average(x => x.jz1co2nd),1),
+                jz1kswd = Math.Round(g.Average(x => x.jz1kswd), 1) - (decimal)2.5,
+                kssdz = Math.Round(g.Average(x => x.kssdz), 1),
+                jz1co2nd = Math.Round(g.Average(x => x.jz1co2nd), 1),
                 create_time = g.Key
 
             }).ToList();
@@ -524,7 +524,7 @@ namespace GZSAC.Controllers
             var group = data.GroupBy(x => (Convert.ToDateTime(x.rq).ToString("yyyy-MM-dd HH:mm"))).Select(g => new TB_PARSING_NEWDATAS
             {
                 cxh = g.First().cxh,
-                jz1kswd = Math.Round(g.Average(x => x.jz1kswd),1) - 2.5,
+                jz1kswd = Math.Round(g.Average(x => x.jz1kswd), 1) - 2.5,
                 kssdz = (int)g.Average(x => x.kssdz),
                 jz1co2nd = (int)g.Average(x => x.jz1co2nd),
                 jz1mbwd = Math.Round(g.Average(y => y.jz1mbwd), 1),
@@ -568,124 +568,12 @@ namespace GZSAC.Controllers
                 jz1ysj2wxdlz = Math.Round(g.Average(x => x.jz1ysj2wxdlz), 1),
                 jz1ysj1pl = (int)g.Average(x => x.jz1ysj1pl),
                 jz1ysj2pl = (int)g.Average(x => x.jz1ysj2pl),
-                jz1bpq1gl = Math.Round(g.Average(x => x.jz1bpq1gl),1),
+                jz1bpq1gl = Math.Round(g.Average(x => x.jz1bpq1gl), 1),
                 jz1bpq2gl = Math.Round(g.Average(x => x.jz1bpq2gl), 1),
                 jz1bpq1scdy = Math.Round(g.Average(x => x.jz1bpq1scdy), 1),
                 jz1bpq2scdy = Math.Round(g.Average(x => x.jz1bpq2scdy), 1),
                 jz1ktnh = (int)g.Average(x => x.jz1ktnh),
                 create_time = Convert.ToDateTime(g.Key)
-
-            }).ToList();
-
-            result.Data = group;
-            return result;
-        }
-
-        /// <summary>
-        /// 通过属性获取折线图数据
-        /// </summary>
-        /// <param name="cxh">车厢号</param>
-        /// <param name="jz">机组</param>
-        /// <param name="code">关键数据Code，多选用，分隔</param>
-        /// <param name="startTime"></param>
-        /// <param name="endTime"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        [HttpGet]
-        [Route("GetTrainLineRawInfo")]
-        public async Task<AjaxResult<List<TB_PARSING_NEWDATAS>>> GetTrainLineRawInfo(string cxh, string? jz, string? startTime, string? endTime, string? code = "jz1kswd,kssdz,jz1co2nd")
-        {
-            var result = new AjaxResult<List<TB_PARSING_NEWDATAS>>();
-
-            if (string.IsNullOrEmpty(cxh))
-            {
-                throw new Exception("����Ų���Ϊ��");
-            }
-
-            string wheresql = "";
-
-            if (!string.IsNullOrEmpty(jz))
-            {
-                wheresql += " and yxtzjid = " + jz + "";
-            }
-            if (!string.IsNullOrEmpty(startTime))
-            {
-                wheresql += " and create_time >= '" + startTime + "'";
-            }
-            if (!string.IsNullOrEmpty(endTime))
-            {
-                wheresql += " and create_time < '" + endTime + "'";
-            }
-
-            string sql = $"select lch,create_time,yxtzjid,cxh,{code} " +
-                        " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
-                        " where cxh='{0}'{1}" +
-                        " order by create_time";
-
-            if (string.IsNullOrEmpty(code))
-            {
-                sql = $"select * " +
-                       " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
-                       " where cxh='{0}'{1}" +
-                       " order by create_time";
-            }
-            sql = string.Format(sql, cxh, wheresql);
-
-            var data = await _db.SqlQueryable<TB_PARSING_NEWDATAS>(sql).ToListAsync();
-
-            var group = data.Select(x => new TB_PARSING_NEWDATAS
-            {
-                cxh = x.cxh,
-                jz1kswd = Math.Round(x.jz1kswd, 1) - 2.5,
-                kssdz = (int)x.kssdz,
-                jz1co2nd = (int)x.jz1co2nd,
-                jz1mbwd = Math.Round(x.jz1mbwd, 1),
-                jz1swwd = Math.Round(x.jz1swwd, 1),
-                jz1kswdcgq1wd = Math.Round(x.jz1kswdcgq1wd, 1),
-                jz1sfcgq1wd = Math.Round(x.jz1sfcgq1wd, 1),
-                jz1sfcgq2wd = Math.Round(x.jz1sfcgq2wd, 1),
-                jz1ysj1pqwd = Math.Round(x.jz1ysj1pqwd, 1),
-                jz1ysj2pqwd = Math.Round(x.jz1ysj2pqwd, 1),
-                jz1ysj1xqwd = Math.Round(x.jz1ysj1xqwd, 1),
-                jz1ysj2xqwd = Math.Round(x.jz1ysj2xqwd, 1),
-                jz1kqzljcmkwd = Math.Round(x.jz1kqzljcmkwd, 1),
-                jz1pm2d5nd = (int)x.jz1pm2d5nd,
-                jz1tvocnd = (int)x.jz1tvocnd,
-                jz1xff1kd = (int)x.jz1xff1kd,
-                jz1xff2kd = (int)x.jz1xff2kd,
-                jz1hff1kd = (int)x.jz1hff1kd,
-                jz1hff2kd = (int)x.jz1hff2kd,
-                jz1ysj1gyyl = (int)x.jz1ysj1gyyl,
-                jz1ysj1dyyl = (int)x.jz1ysj1dyyl,
-                jz1ysj2gyyl = (int)x.jz1ysj2gyyl,
-                jz1ysj2dyyl = (int)x.jz1ysj2dyyl,
-                jz1lwylz = (int)x.jz1lwylz,
-                jz1tfj1uxdlz = Math.Round(x.jz1tfj1uxdlz, 1),
-                jz1tfj1vxdlz = Math.Round(x.jz1tfj1vxdlz, 1),
-                jz1tfj1wxdlz = Math.Round(x.jz1tfj1wxdlz, 1),
-                jz1tfj2uxdlz = Math.Round(x.jz1tfj2uxdlz, 1),
-                jz1tfj2vxdlz = Math.Round(x.jz1tfj2vxdlz, 1),
-                jz1tfj2wxdlz = Math.Round(x.jz1tfj2wxdlz, 1),
-                jz1lnfj1uxdlz = Math.Round(x.jz1lnfj1uxdlz, 1),
-                jz1lnfj1vxdlz = Math.Round(x.jz1lnfj1vxdlz, 1),
-                jz1lnfj1wxdlz = Math.Round(x.jz1lnfj1wxdlz, 1),
-                jz1lnfj2uxdlz = Math.Round(x.jz1lnfj2uxdlz, 1),
-                jz1lnfj2vxdlz = Math.Round(x.jz1lnfj2vxdlz, 1),
-                jz1lnfj2wxdlz = Math.Round(x.jz1lnfj2wxdlz, 1),
-                jz1ysj1uxdlz = Math.Round(x.jz1ysj1uxdlz, 1),
-                jz1ysj1vxdlz = Math.Round(x.jz1ysj1vxdlz, 1),
-                jz1ysj1wxdlz = Math.Round(x.jz1ysj1wxdlz, 1),
-                jz1ysj2uxdlz = Math.Round(x.jz1ysj2uxdlz, 1),
-                jz1ysj2vxdlz = Math.Round(x.jz1ysj2vxdlz, 1),
-                jz1ysj2wxdlz = Math.Round(x.jz1ysj2wxdlz, 1),
-                jz1ysj1pl = (int)x.jz1ysj1pl,
-                jz1ysj2pl = (int)x.jz1ysj2pl,
-                jz1bpq1gl = Math.Round(x.jz1bpq1gl, 1),
-                jz1bpq2gl = Math.Round(x.jz1bpq2gl, 1),
-                jz1bpq1scdy = Math.Round(x.jz1bpq1scdy, 1),
-                jz1bpq2scdy = Math.Round(x.jz1bpq2scdy, 1),
-                jz1ktnh = (int)x.jz1ktnh,
-                create_time = x.create_time
 
             }).ToList();
 
@@ -803,7 +691,7 @@ namespace GZSAC.Controllers
                 q = q.Where(a => a.WZ == Convert.ToInt32(jz));
             }
             if (!string.IsNullOrEmpty(name))
-            {               
+            {
                 q = q.Where(a => a.Name == name);
             }
             if (!string.IsNullOrEmpty(gzbj))
@@ -882,8 +770,8 @@ namespace GZSAC.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("GetFaultWarn")]
-        public async Task<PageResult<FaultPageDTO>> GetFaultWarn(string? lch, string? cxh, string? jz,string? type,string? startTime,string? endTime, string sortFile = "createtime", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
-        {        
+        public async Task<PageResult<FaultPageDTO>> GetFaultWarn(string? lch, string? cxh, string? jz, string? type, string? startTime, string? endTime, string sortFile = "createtime", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
+        {
             string sql = @"SELECT
                                 f.Id,
 	                            f.Type, 
@@ -925,7 +813,7 @@ namespace GZSAC.Controllers
 	                            h_dic.ParentId = '10003'
                            ";
 
-            var q =  _db.SqlQueryable<FaultPageDTO>(sql);
+            var q = _db.SqlQueryable<FaultPageDTO>(sql);
 
             if (!string.IsNullOrEmpty(lch))
             {
@@ -945,7 +833,7 @@ namespace GZSAC.Controllers
             }
             if (!string.IsNullOrEmpty(startTime))
             {
-                startTime  += " 00:00:00";
+                startTime += " 00:00:00";
                 q = q.Where(a => Convert.ToDateTime(a.createtime) >= Convert.ToDateTime(startTime));
             }
             if (!string.IsNullOrEmpty(endTime))
@@ -1047,7 +935,7 @@ namespace GZSAC.Controllers
 
             result.Data = q;
 
-            return result;           
+            return result;
         }
 
         /// <summary>
@@ -1071,7 +959,7 @@ namespace GZSAC.Controllers
                 string rptTitle = "故障预警导出模板";
                 ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
                 ExcelUtil.Instance().AliasDataSource.Clear();
-                var data = await GetFaultWarn(lch, cxh, jz, type, startTime, endTime, sortFile, sortType,pageIndex, pageRow);
+                var data = await GetFaultWarn(lch, cxh, jz, type, startTime, endTime, sortFile, sortType, pageIndex, pageRow);
                 var dataTable = data.Data.ToDataTable(); // 确保 ToDataTable() 方法存在或正确实现  
                 dataTable.TableName = "FaultWarn";
                 //{ rptTitle}
@@ -1111,7 +999,7 @@ namespace GZSAC.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("GetFaultWarnType")]
-        public async Task<AjaxResult<List<FaultTypeDTO>>> GetFaultWarnType(string? lch, string? cxh, string? type,string? timeType, string? startTime, string? endTime)
+        public async Task<AjaxResult<List<FaultTypeDTO>>> GetFaultWarnType(string? lch, string? cxh, string? type, string? timeType, string? startTime, string? endTime)
         {
 
             string wheresql = "";
@@ -1137,7 +1025,7 @@ namespace GZSAC.Controllers
 
                 switch (timeType)
                 {
-                    case "0":                        
+                    case "0":
                         startTime = DateTime.Today.ToString("yyyy-MM-dd HH:mm:ss");
                         break;
                     case "1":
@@ -1222,11 +1110,11 @@ namespace GZSAC.Controllers
                 num = 12;
             }
 
-            var warnNum = q.Where(x => x.Type == "2" );
+            var warnNum = q.Where(x => x.Type == "2");
             var faultNum = q.Where(x => x.Type == "1");
 
-            var fault = new FaultWarnNum() 
-            { 
+            var fault = new FaultWarnNum()
+            {
                 SubHealthNum = warnNum.Where(x => x.State == "1").Select(x => x.DeviceCode).Distinct().Count(),
                 UnHealthNum = faultNum.Where(x => x.State == "1").Select(x => x.DeviceCode).Distinct().Count(),
                 WarnSum = warnNum.Count(),
@@ -1236,7 +1124,7 @@ namespace GZSAC.Controllers
             fault.HealthNum = num - fault.SubHealthNum - fault.UnHealthNum;
             result.Data = fault;
             return result;
-         
+
         }
 
         /// <summary>
@@ -1260,7 +1148,7 @@ namespace GZSAC.Controllers
                 string rptTitle = "部件寿命导出";
                 ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
                 ExcelUtil.Instance().AliasDataSource.Clear();
-                var data = await GetPartsLife(lch, cxh, jz, name, gzbj,sortFile, sortType, pageIndex, pageRow);
+                var data = await GetPartsLife(lch, cxh, jz, name, gzbj, sortFile, sortType, pageIndex, pageRow);
                 var dataTable = data.Data.ToDataTable(); // 确保 ToDataTable() 方法存在或正确实现  
                 dataTable.TableName = "PartsLife";
                 //{ rptTitle}
@@ -1364,7 +1252,7 @@ namespace GZSAC.Controllers
                 var endTime = time.AddMinutes(10);
                 var tabletime = time.ToString("yyyyMMdd");
                 var sql = $@"select * from TB_PARSING_DATAS_{tabletime}";
-                var data = _db.SqlQueryable<TB_PARSING_DATAS>(sql).Where(x => x.device_code == q.DeviceCode && x.create_time >= startTime && x.create_time <= endTime); 
+                var data = _db.SqlQueryable<TB_PARSING_DATAS>(sql).Where(x => x.device_code == q.DeviceCode && x.create_time >= startTime && x.create_time <= endTime);
                 var dataTable = data.ToDataTable(); // 确保 ToDataTable() 方法存在或正确实现  
                 dataTable.TableName = "ParesData";
                 //{ rptTitle}
@@ -1395,5 +1283,121 @@ namespace GZSAC.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the Excel file.");
             }
         }
+
+
+        /// <summary>
+        /// 通过属性获取折线图数据
+        /// </summary>
+        /// <param name="cxh">车厢号</param>
+        /// <param name="jz">机组</param>
+        /// <param name="code">关键数据Code，多选用，分隔</param>
+        /// <param name="startTime"></param>
+        /// <param name="endTime"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        [HttpGet]
+        [Route("GetTrainLineRawInfo")]
+        public async Task<AjaxResult<List<TB_PARSING_NEWDATAS>>> GetTrainLineRawInfo(string cxh, string? jz, string? startTime, string? endTime, string? code = "jz1kswd,kssdz,jz1co2nd")
+        {
+            var result = new AjaxResult<List<TB_PARSING_NEWDATAS>>();
+
+            if (string.IsNullOrEmpty(cxh))
+            {
+                throw new Exception("车厢号不能为空");
+            }
+
+            string wheresql = "";
+
+            if (!string.IsNullOrEmpty(jz))
+            {
+                wheresql += " and yxtzjid = " + jz + "";
+            }
+            if (!string.IsNullOrEmpty(startTime))
+            {
+                wheresql += " and create_time >= '" + startTime + "'";
+            }
+            if (!string.IsNullOrEmpty(endTime))
+            {
+                wheresql += " and create_time < '" + endTime + "'";
+            }
+
+            string sql = $"select lch,create_time,yxtzjid,cxh,{code} " +
+                        " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
+                        " where cxh='{0}'{1}" +
+                        " order by create_time";
+
+            if (string.IsNullOrEmpty(code))
+            {
+                sql = $"select * " +
+                       " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
+                       " where cxh='{0}'{1}" +
+                       " order by create_time";
+            }
+            sql = string.Format(sql, cxh, wheresql);
+
+            var data = await _db.SqlQueryable<TB_PARSING_NEWDATAS>(sql).ToListAsync();
+
+            var group = data.Select(x => new TB_PARSING_NEWDATAS
+            {
+                cxh = x.cxh,
+                jz1kswd = Math.Round(x.jz1kswd, 1) - 2.5,
+                kssdz = (int)x.kssdz,
+                jz1co2nd = (int)x.jz1co2nd,
+                jz1mbwd = Math.Round(x.jz1mbwd, 1),
+                jz1swwd = Math.Round(x.jz1swwd, 1),
+                jz1kswdcgq1wd = Math.Round(x.jz1kswdcgq1wd, 1),
+                jz1sfcgq1wd = Math.Round(x.jz1sfcgq1wd, 1),
+                jz1sfcgq2wd = Math.Round(x.jz1sfcgq2wd, 1),
+                jz1ysj1pqwd = Math.Round(x.jz1ysj1pqwd, 1),
+                jz1ysj2pqwd = Math.Round(x.jz1ysj2pqwd, 1),
+                jz1ysj1xqwd = Math.Round(x.jz1ysj1xqwd, 1),
+                jz1ysj2xqwd = Math.Round(x.jz1ysj2xqwd, 1),
+                jz1kqzljcmkwd = Math.Round(x.jz1kqzljcmkwd, 1),
+                jz1pm2d5nd = (int)x.jz1pm2d5nd,
+                jz1tvocnd = (int)x.jz1tvocnd,
+                jz1xff1kd = (int)x.jz1xff1kd,
+                jz1xff2kd = (int)x.jz1xff2kd,
+                jz1hff1kd = (int)x.jz1hff1kd,
+                jz1hff2kd = (int)x.jz1hff2kd,
+                jz1ysj1gyyl = (int)x.jz1ysj1gyyl,
+                jz1ysj1dyyl = (int)x.jz1ysj1dyyl,
+                jz1ysj2gyyl = (int)x.jz1ysj2gyyl,
+                jz1ysj2dyyl = (int)x.jz1ysj2dyyl,
+                jz1lwylz = (int)x.jz1lwylz,
+                jz1tfj1uxdlz = Math.Round(x.jz1tfj1uxdlz, 1),
+                jz1tfj1vxdlz = Math.Round(x.jz1tfj1vxdlz, 1),
+                jz1tfj1wxdlz = Math.Round(x.jz1tfj1wxdlz, 1),
+                jz1tfj2uxdlz = Math.Round(x.jz1tfj2uxdlz, 1),
+                jz1tfj2vxdlz = Math.Round(x.jz1tfj2vxdlz, 1),
+                jz1tfj2wxdlz = Math.Round(x.jz1tfj2wxdlz, 1),
+                jz1lnfj1uxdlz = Math.Round(x.jz1lnfj1uxdlz, 1),
+                jz1lnfj1vxdlz = Math.Round(x.jz1lnfj1vxdlz, 1),
+                jz1lnfj1wxdlz = Math.Round(x.jz1lnfj1wxdlz, 1),
+                jz1lnfj2uxdlz = Math.Round(x.jz1lnfj2uxdlz, 1),
+                jz1lnfj2vxdlz = Math.Round(x.jz1lnfj2vxdlz, 1),
+                jz1lnfj2wxdlz = Math.Round(x.jz1lnfj2wxdlz, 1),
+                jz1ysj1uxdlz = Math.Round(x.jz1ysj1uxdlz, 1),
+                jz1ysj1vxdlz = Math.Round(x.jz1ysj1vxdlz, 1),
+                jz1ysj1wxdlz = Math.Round(x.jz1ysj1wxdlz, 1),
+                jz1ysj2uxdlz = Math.Round(x.jz1ysj2uxdlz, 1),
+                jz1ysj2vxdlz = Math.Round(x.jz1ysj2vxdlz, 1),
+                jz1ysj2wxdlz = Math.Round(x.jz1ysj2wxdlz, 1),
+                jz1ysj1pl = (int)x.jz1ysj1pl,
+                jz1ysj2pl = (int)x.jz1ysj2pl,
+                jz1bpq1gl = Math.Round(x.jz1bpq1gl, 1),
+                jz1bpq2gl = Math.Round(x.jz1bpq2gl, 1),
+                jz1bpq1scdy = Math.Round(x.jz1bpq1scdy, 1),
+                jz1bpq2scdy = Math.Round(x.jz1bpq2scdy, 1),
+                jz1ktnh = (int)x.jz1ktnh,
+                create_time = x.create_time
+
+            }).ToList();
+
+            result.Data = group;
+            return result;
+        }
+
     }
 }
+
+
