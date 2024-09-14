@@ -1321,15 +1321,17 @@ namespace GZSAC.Controllers
                 wheresql += " and create_time < '" + endTime + "'";
             }
 
+            var time = Convert.ToDateTime(startTime).ToString("yyyyMMdd");
+
             string sql = $"select lch,create_time,yxtzjid,cxh,{code} " +
-                        " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
+                        " from TB_PARSING_DATAS" + $"_{time} " +
                         " where cxh='{0}'{1}" +
                         " order by create_time";
 
             if (string.IsNullOrEmpty(code))
             {
                 sql = $"select * " +
-                       " from TB_PARSING_DATAS" + $"_{DateTime.Now.ToString("yyyyMMdd")} " +
+                       " from TB_PARSING_DATAS" + $"_{time} " +
                        " where cxh='{0}'{1}" +
                        " order by create_time";
             }
