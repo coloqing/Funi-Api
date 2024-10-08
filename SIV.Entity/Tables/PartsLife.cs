@@ -7,43 +7,41 @@ using System.Threading.Tasks;
 
 namespace SIV.Entity
 {
-
+    /// <summary>
+    /// 部件寿命表
+    /// </summary>
     [SugarTable("PartsLife")]
-    public class PartsLife
+    public class PartsLife :BaseEntity
     {
-
-        [SugarColumn(IsPrimaryKey = true, IsIdentity = true, ColumnDescription = "主键ID  部件寿命表")]
-        public long Id { get; set; }
-
         /// <summary>
         /// 部件名称
         /// </summary>
         [SugarColumn(ColumnDescription = "部件名称", Length = 255)]
-        public string? Name { get; set; }
+        public string? PartsName { get; set; }
 
         /// <summary>
         /// 线路
         /// </summary>           
         [SugarColumn(ColumnDescription = "线路", Length = 255)]
-        public string? XL { get; set; }
+        public string? LineName { get; set; }
 
         /// <summary>
         /// 车号
         /// </summary>           
         [SugarColumn(ColumnDescription = "车号", Length = 255)]
-        public string? CH { get; set; }
+        public string? TrainNumber { get; set; }
 
         /// <summary>
         /// 车厢
         /// </summary>           
         [SugarColumn(ColumnDescription = "车厢", Length = 255)]
-        public string? CX { get; set; }
+        public string? CarriageNuber { get; set; }
 
         /// <summary>
         /// 部件位置
         /// </summary>           
         [SugarColumn(ColumnDescription = "部件位置", Length = 255)]
-        public int? WZ { get; set; }
+        public int? PartsPosition { get; set; }
 
         /// <summary>
         /// 类型
@@ -74,38 +72,5 @@ namespace SIV.Entity
         /// </summary>           
         [SugarColumn(ColumnDescription = "百分比")]
         public decimal? Percent { get; set; }
-
-        /// <summary>
-        /// Desc:创建时间
-        /// Default:DateTime.Now
-        /// Nullable:True
-        /// </summary>           
-        [SugarColumn(ColumnDescription = "创建时间")]
-        public DateTime? createtime { get; set; }
-
-        /// <summary>
-        /// Desc:创建人
-        /// Default:
-        /// Nullable:True
-        /// </summary>           
-        [SugarColumn(ColumnDescription = "创建人", Length = 50)]
-        public string? createuserid { get; set; }
-
-        /// <summary>
-        /// Desc:修改时间
-        /// Default:
-        /// Nullable:True
-        /// </summary>           
-        [SugarColumn(ColumnDescription = "修改时间")]
-        public DateTime? updatetime { get; set; }
-
-        /// <summary>
-        /// Desc:修改人
-        /// Default:
-        /// Nullable:True
-        /// </summary>           
-        [SugarColumn(ColumnDescription = "修改人", Length = 50)]
-        public string? updateuserid { get; set; }
-
     }
 }

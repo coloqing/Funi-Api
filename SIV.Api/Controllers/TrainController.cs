@@ -58,11 +58,10 @@ namespace SIV.Controllers
         }
 
         /// <summary>
-        /// 获取分析系统列车统计数据
+        /// 获取列车状态
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("GetHttpTrain")]
         public async Task<AjaxResult<List<TrainState>>> GetHttpTrain()
         {
             var result = new AjaxResult<List<TrainState>>();
@@ -79,7 +78,6 @@ namespace SIV.Controllers
             return result;
 
             string urlType = "line-statistics";
-
 
             // 构建app_token
             string appToken = $"app_id={appId}&app_key={appKey}&date=" + DateTime.Now.ToString("yyyy-MM-dd");
@@ -112,7 +110,6 @@ namespace SIV.Controllers
                 result.Data = data;
                 return result;
             }
-
         }
 
         /// <summary>
@@ -663,99 +660,99 @@ namespace SIV.Controllers
             return result;
         }
 
-        /// <summary>
-        /// 获取寿命分页信息
-        /// </summary>
-        /// <param name="lch">列车号</param>
-        /// <param name="cxh">车厢号</param>
-        /// <param name="jz">机组</param>
-        /// <param name="name">寿命部件名称</param>
-        /// <param name="sortFile"></param>
-        /// <param name="sortType"></param>
-        /// <param name="pageIndex">页数</param>
-        /// <param name="pageRow">每页行数</param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("GetPartsLife")]
-        public async Task<PageResult<PartsLifeDTO>> GetPartsLife(string? lch, string? cxh, string? jz, string? name, string? gzbj, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
-        {
-            var q = _db.Queryable<PartsLife>();
+        ///// <summary>
+        ///// 获取寿命分页信息
+        ///// </summary>
+        ///// <param name="lch">列车号</param>
+        ///// <param name="cxh">车厢号</param>
+        ///// <param name="jz">机组</param>
+        ///// <param name="name">寿命部件名称</param>
+        ///// <param name="sortFile"></param>
+        ///// <param name="sortType"></param>
+        ///// <param name="pageIndex">页数</param>
+        ///// <param name="pageRow">每页行数</param>
+        ///// <returns></returns>
+        //[HttpGet]
+        //[Route("GetPartsLife")]
+        //public async Task<PageResult<PartsLifeDTO>> GetPartsLife(string? lch, string? cxh, string? jz, string? name, string? gzbj, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
+        //{
+        //    var q = _db.Queryable<PartsLife>();
 
-            if (!string.IsNullOrEmpty(lch))
-            {
-                q = q.Where(a => a.CH == lch);
-            }
-            if (!string.IsNullOrEmpty(cxh))
-            {
-                q = q.Where(a => a.CX == cxh);
-            }
-            if (!string.IsNullOrEmpty(jz))
-            {
-                q = q.Where(a => a.WZ == Convert.ToInt32(jz));
-            }
-            if (!string.IsNullOrEmpty(name))
-            {
-                q = q.Where(a => a.Name == name);
-            }
-            if (!string.IsNullOrEmpty(gzbj))
-            {
-                var dicname = _db.Queryable<TB_SYS_DIC>().Where(x => x.ParentId == "1001" && x.Code == gzbj).First().Name;
+        //    if (!string.IsNullOrEmpty(lch))
+        //    {
+        //        q = q.Where(a => a.CH == lch);
+        //    }
+        //    if (!string.IsNullOrEmpty(cxh))
+        //    {
+        //        q = q.Where(a => a.CX == cxh);
+        //    }
+        //    if (!string.IsNullOrEmpty(jz))
+        //    {
+        //        q = q.Where(a => a.WZ == Convert.ToInt32(jz));
+        //    }
+        //    if (!string.IsNullOrEmpty(name))
+        //    {
+        //        q = q.Where(a => a.Name == name);
+        //    }
+        //    if (!string.IsNullOrEmpty(gzbj))
+        //    {
+        //        var dicname = _db.Queryable<TB_SYS_DIC>().Where(x => x.ParentId == "1001" && x.Code == gzbj).First().Name;
 
-                q = q.Where(a => a.Name == dicname);
-            }
+        //        q = q.Where(a => a.Name == dicname);
+        //    }
 
-            var data = await q.Select(x => new PartsLifeDTO
-            {
-                Id = x.Id,
-                Name = x.Name,
-                XL = x.XL,
-                CH = x.CH,
-                CX = x.CX,
-                WZ = x.WZ,
-                WZName = x.WZ == 1 ? "机组1" : "机组2",
-                Type = x.Type,
-                TypeName = x.Type == "H" ? "时长(小时)" : "次数",
-                RunLife = x.RunLife,
-                RatedLife = x.RatedLife,
-                SurplusLife = (x.RatedLife) - (x.RunLife ?? 0),
-                createtime = x.createtime,
-                updatetime = x.updatetime
-                //Percent = (decimal?)((x.RunLife ?? 0)/(decimal?)x.RatedLife)
+        //    var data = await q.Select(x => new PartsLifeDTO
+        //    {
+        //        Id = x.Id,
+        //        Name = x.Name,
+        //        XL = x.XL,
+        //        CH = x.CH,
+        //        CX = x.CX,
+        //        WZ = x.WZ,
+        //        WZName = x.WZ == 1 ? "机组1" : "机组2",
+        //        Type = x.Type,
+        //        TypeName = x.Type == "H" ? "时长(小时)" : "次数",
+        //        RunLife = x.RunLife,
+        //        RatedLife = x.RatedLife,
+        //        SurplusLife = (x.RatedLife) - (x.RunLife ?? 0),
+        //        createtime = x.createtime,
+        //        updatetime = x.updatetime
+        //        //Percent = (decimal?)((x.RunLife ?? 0)/(decimal?)x.RatedLife)
 
-            }).ToListAsync();
+        //    }).ToListAsync();
 
-            int count = await q.CountAsync();
+        //    int count = await q.CountAsync();
 
-            foreach (var item in data)
-            {
-                if (item.RatedLife != 0) // 假设RatedLife不应为0以避免除以零错误  
-                {
-                    item.Percent = Math.Round((decimal)((item.RunLife * 100) / item.RatedLife), 1);
-                    item.RunLife = Math.Round((decimal)item.RunLife, 1);
-                }
-            }
+        //    foreach (var item in data)
+        //    {
+        //        if (item.RatedLife != 0) // 假设RatedLife不应为0以避免除以零错误  
+        //        {
+        //            item.Percent = Math.Round((decimal)((item.RunLife * 100) / item.RatedLife), 1);
+        //            item.RunLife = Math.Round((decimal)item.RunLife, 1);
+        //        }
+        //    }
 
-            // 增加不分页判断
-            if (pageRow <= 0)
-            {
-                pageRow = count;
-            }
+        //    // 增加不分页判断
+        //    if (pageRow <= 0)
+        //    {
+        //        pageRow = count;
+        //    }
 
-            data = data.OrderByDescending(x => x.Percent)
-              .Skip((pageIndex - 1) * pageRow)
-              .Take(pageRow)
-              .ToList();
+        //    data = data.OrderByDescending(x => x.Percent)
+        //      .Skip((pageIndex - 1) * pageRow)
+        //      .Take(pageRow)
+        //      .ToList();
 
-            //var result = await data.GetPageResultAsync(sortFile, sortType, pageIndex, pageRow);
-            return new PageResult<PartsLifeDTO>
-            {
-                Data = data,
-                Total = count,
-                Success = true,
-                Code = 200,
-                Message = "查询成功"
-            };
-        }
+        //    //var result = await data.GetPageResultAsync(sortFile, sortType, pageIndex, pageRow);
+        //    return new PageResult<PartsLifeDTO>
+        //    {
+        //        Data = data,
+        //        Total = count,
+        //        Success = true,
+        //        Code = 200,
+        //        Message = "查询成功"
+        //    };
+        //}
 
         /// <summary>
         /// 获取故障预警信息
@@ -1104,22 +1101,22 @@ namespace SIV.Controllers
         public async Task<AjaxResult<FaultWarnNum>> GetFaultWarnNum(string? lch)
         {
             var result = new AjaxResult<FaultWarnNum>();
-            var q = await _db.Queryable<FaultOrWarn>().Where(x => Convert.ToDateTime(x.createtime).Date == DateTime.Now.Date).ToListAsync();
+            var q = await _db.Queryable<FaultOrWarn>().Where(x => Convert.ToDateTime(x.CreateTime).Date == DateTime.Now.Date).ToListAsync();
 
             var num = 228;
             if (!string.IsNullOrEmpty(lch))
             {
-                q = q.Where(x => x.lch == lch).ToList();
+                q = q.Where(x => x.TrainNumber == lch).ToList();
                 num = 12;
             }
 
-            var warnNum = q.Where(x => x.Type == "2");
-            var faultNum = q.Where(x => x.Type == "1");
+            var warnNum = q.Where(x => x.Type == 2);
+            var faultNum = q.Where(x => x.Type == 1);
 
             var fault = new FaultWarnNum()
             {
-                SubHealthNum = warnNum.Where(x => x.State == "1").Select(x => x.DeviceCode).Distinct().Count(),
-                UnHealthNum = faultNum.Where(x => x.State == "1").Select(x => x.DeviceCode).Distinct().Count(),
+                SubHealthNum = warnNum.Where(x => x.State == 1).Select(x => x.DeviceCode).Distinct().Count(),
+                UnHealthNum = faultNum.Where(x => x.State == 1).Select(x => x.DeviceCode).Distinct().Count(),
                 WarnSum = warnNum.Count(),
                 FaultSum = faultNum.Count(),
             };
@@ -1130,58 +1127,60 @@ namespace SIV.Controllers
 
         }
 
-        /// <summary>
-        /// 导出寿命数据
-        /// </summary>
-        /// <param name="lch"></param>
-        /// <param name="cxh"></param>
-        /// <param name="jz"></param>
-        /// <param name="name"></param>
-        /// <param name="sortFile"></param>
-        /// <param name="sortType"></param>
-        /// <param name="pageIndex"></param>
-        /// <param name="pageRow"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("GetPartsLife/excel")]
-        public async Task<IActionResult> PartsLifeExcel(string? lch, string? cxh, string? jz, string? name, string? gzbj, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
-        {
-            try
-            {
-                string rptTitle = "部件寿命导出";
-                ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
-                ExcelUtil.Instance().AliasDataSource.Clear();
-                var data = await GetPartsLife(lch, cxh, jz, name, gzbj, sortFile, sortType, pageIndex, pageRow);
-                var dataTable = data.Data.ToDataTable(); // 确保 ToDataTable() 方法存在或正确实现  
-                dataTable.TableName = "PartsLife";
-                //{ rptTitle}
-                //_{ DateTime.Now}
+        ///// <summary>
+        ///// 导出寿命数据
+        ///// </summary>
+        ///// <param name = "lch" ></ param >
+        ///// < param name="cxh"></param>
+        ///// <param name = "jz" ></ param >
+        ///// < param name="name"></param>
+        ///// <param name = "sortFile" ></ param >
+        ///// < param name="sortType"></param>
+        ///// <param name = "pageIndex" ></ param >
+        ///// < param name="pageRow"></param>
+        ///// <returns></returns>
+        //[HttpPost]
+        //[Route("GetPartsLife/excel")]
+        //public async Task<IActionResult> PartsLifeExcel(string? lch, string? cxh, string? jz, string? name, string? gzbj, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
+        //{
+        //    try
+        //    {
+        //        string rptTitle = "部件寿命导出";
+        //        ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
+        //        ExcelUtil.Instance().AliasDataSource.Clear();
+        //        var data = await GetPartsLife(lch, cxh, jz, name, gzbj, sortFile, sortType, pageIndex, pageRow);
+        //        var dataTable = data.Data.ToDataTable(); // 确保 ToDataTable() 方法存在或正确实现  
+        //        dataTable.TableName = "PartsLife";
+        //        { rptTitle}
+        //        _{ DateTime.Now}
 
-                // 调用 Save 方法获取 MemoryStream  
-                using (var stream = ExcelUtil.Instance().Save(dataTable, "部件寿命导出模板"))
-                {
+        //        调用 Save 方法获取 MemoryStream
+        //        using (var stream = ExcelUtil.Instance().Save(dataTable, "部件寿命导出模板"))
+        //        {
 
-                    byte[] excelBytes = new byte[stream.Length];
-                    stream.Read(excelBytes, 0, excelBytes.Length);
+        //            byte[] excelBytes = new byte[stream.Length];
+        //            stream.Read(excelBytes, 0, excelBytes.Length);
 
-                    // 设置文件名  
-                    string fileName = rptTitle + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
+        //            // 设置文件名  
+        //            string fileName = rptTitle + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
 
-                    // 返回文件给客户端  
-                    return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        //            // 返回文件给客户端  
+        //            return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
 
-                }
-            }
-            catch (Exception ex)
-            {
-                // 记录错误或处理异常  
-                // 例如，可以使用日志记录器记录异常  
-                _logger.LogError(ex, "Error occurred while generating Excel file.");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        记录错误或处理异常
+        //        例如，可以使用日志记录器记录异常
+        //        _logger.LogError(ex, "Error occurred while generating Excel file.");
 
-                // 返回一个错误响应  
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the Excel file.");
-            }
-        }
+        //        返回一个错误响应
+        //        return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the Excel file.");
+        //    }
+        //}
+
+
         /// <summary>
         /// 关键数据导出
         /// </summary>
@@ -1250,7 +1249,7 @@ namespace SIV.Controllers
                 ExcelUtil.Instance().AliasDataSource.Clear();
                 var q = await _db.Queryable<FaultOrWarn>().FirstAsync(x => x.Id == id);
 
-                var time = Convert.ToDateTime(q.createtime);
+                var time = Convert.ToDateTime(q.CreateTime);
                 var startTime = time.AddMinutes(-10);
                 var endTime = time.AddMinutes(10);
                 var tabletime = time.ToString("yyyyMMdd");

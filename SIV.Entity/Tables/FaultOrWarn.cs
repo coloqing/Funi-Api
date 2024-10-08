@@ -7,27 +7,50 @@ using System.Threading.Tasks;
 
 namespace SIV.Entity
 {
+    /// <summary>
+    /// 故障预警表
+    /// </summary>
     [SugarTable("FaultOrWarn")]
-    public class FaultOrWarn
+    public class FaultOrWarn :BaseEntity
     {
-        [SugarColumn(IsPrimaryKey = true, IsIdentity = true, ColumnDescription = "主键ID  故障预警表")]
-        public int Id { get; set; }
-
         /// <summary>
         /// 线路名称
         /// </summary>
-        [SugarColumn(ColumnDescription = "线路名称")]
-        public string xlh { get; set; }
+        public string? LineName { get; set; }
 
-        [SugarColumn(ColumnDescription = "列车号")]
-        public string lch { get; set; }
-        public string cxh { get; set; }
-        public string DeviceCode { get; set; }
-        public string Code { get; set; }
-        public string Type { get; set; }
-        public string State { get; set; }
-        public string createtime { get; set; }
-        public string updatetime { get; set; }
+        /// <summary>
+        /// 列车号
+        /// </summary>
+        public string? TrainNumber { get; set; }
 
+        /// <summary>
+        /// 车厢号
+        /// </summary>
+        public string? CarriageNumber { get; set; }
+
+        /// <summary>
+        /// 设备编号
+        /// </summary>
+        public string? DeviceCode { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string? Code { get; set; }
+
+        /// <summary>
+        /// 类型 1：故障 2：预警
+        /// </summary>
+        public int Type { get; set; }
+
+        /// <summary>
+        /// 状态  0：已处理 1：未处理
+        /// </summary>
+        public int State { get; set; }
+
+        /// <summary>
+        /// 结束时间
+        /// </summary>
+        public DateTime? EndTime { get; set; }
     }
 }

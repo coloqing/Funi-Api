@@ -9,9 +9,8 @@ namespace SIV.Entity
         /// <summary>
         /// ID
         /// </summary>
-        [Key, Column(Order = 1)]
-        [MaxLength(50)]
-        public String? Id { get; set; }
+        [Key]
+        public long Id { get; set; }
 
         /// <summary>
         /// 创建人
@@ -38,5 +37,11 @@ namespace SIV.Entity
         /// </summary>
         [JsonIgnore]
         public DateTime UpdateTime { get; set; } = DateTime.Now;
+
+        /// <summary>
+        /// 是否删除 0：未删除 1：已删除
+        /// </summary>
+        [JsonIgnore]
+        public int IsDelete { get; set; }
     }
 }
