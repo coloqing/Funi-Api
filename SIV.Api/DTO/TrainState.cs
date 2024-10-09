@@ -3,14 +3,14 @@
     public class TrainState
     {
         /// <summary>
-        /// 列车号
+        /// ID
         /// </summary>
-        public string lch {  get; set; }
+        public long Id {  get; set; }
 
         /// <summary>
-        /// 设备号
+        /// 列车号
         /// </summary>
-        public string cxh {  get; set; }
+        public string? TrainNumber {  get; set; }
 
         /// <summary>
         /// 列车状态 0：离线 1：在线 2：库内

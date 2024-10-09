@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace SIV.Entity
 {
     [SugarTable("SYS_CONFIG")]
-    public class SYS_Config
+    public class SYS_CONFIG
     {
         public int conid {  get; set; }
         public string concode {  get; set; }

@@ -20,6 +20,7 @@ using System.Collections;
 using AutoMapper;
 using SqlSugar.Extensions;
 using SIV.Api;
+using SIV.Entity.Tables;
 
 namespace SIV.Controllers
 {
@@ -34,13 +35,18 @@ namespace SIV.Controllers
         private readonly AppSettings _appSettings;
         private readonly ILogger<TrainController> _logger;
         private readonly IMapper _mapper;
-        private string appId;
-        private string appKey;
-        private string baseUrl;
-        private string lineCode;
+        private string? appId;
+        private string? appKey;
+        private string? baseUrl;
+        private string? lineCode;
 
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="db"></param>
+        /// <param name="mapper"></param>
+        /// <param name="appSettings"></param>
         public TrainController(
             ILogger<TrainController> logger,
             SqlSugarClient db,
@@ -58,61 +64,78 @@ namespace SIV.Controllers
         }
 
         /// <summary>
-        /// 获取分析系统列车统计数据
+        /// 获取列车状态
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
-        [Route("GetHttpTrain")]
+        [HttpGet("TrainState")]
         public async Task<AjaxResult<List<TrainState>>> GetHttpTrain()
         {
             var result = new AjaxResult<List<TrainState>>();
-            string sql = @"SELECT
-	                            a.lch
-                            FROM
-	                            dbo.LCH AS a";
-            var data = _db.SqlQueryable<TrainState>(sql).ToList();
-            foreach (var item in data)
-            {
-                item.cxh = item.lch.Substring(0, 2) + "A" + item.lch.Substring(2, 3);
-            }
+
+            var fault = _db.Queryable<FaultOrWarn>().Where(x => x.State == 0);
+            var data = await _db.Queryable<TB_Train>()
+                .LeftJoin(fault,(a,b)=> a.TrainNumber == b.TrainNumber)
+                .Select((a,b) => new TrainState
+                {
+                    Id = a.Id,
+                    TrainNumber = a.TrainNumber,
+                    State = a.State,
+                    FaultNum = fault.Where(x =>x.TrainNumber == b.TrainNumber && x.Type == 1).Count(),
+                    WarnNum = fault.Where(x =>x.TrainNumber == b.TrainNumber && x.Type == 1).Count()                    
+                }).ToListAsync();
+                      
             result.Data = data;
             return result;
 
-            string urlType = "line-statistics";
+        }
 
+        /// <summary>
+        /// 获取列车状态数量
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("TrainStateNum")]
+        public async Task<AjaxResult<TrainNumDTO>> GetHttpTrainNum()
+        {
+            var result = new AjaxResult<TrainNumDTO>();
+            var config = _db.Queryable<SYS_CONFIG>().ToList();
+          
+            var faultWarnQuery = _db.Queryable<FaultOrWarn>().Where(x => x.State == 0).ToList();
+            var trainStateNum = await _db.Queryable<TB_Train>().Where(x => x.State != 0).CountAsync();
 
-            // 构建app_token
-            string appToken = $"app_id={appId}&app_key={appKey}&date=" + DateTime.Now.ToString("yyyy-MM-dd");
-            string tokenMd5 = Helper.GetMD5String(appToken).ToUpper();
-            string url = $"{baseUrl}{urlType}?app_id={appId}&app_token={tokenMd5}&line_code={lineCode}";
-            var trainSta = await HttpClientExample.SendGetRequestAsync<HttpTrainStaDTO>(url);
+            var trainNum = config.FirstOrDefault(x => x.concode == "TrainNum");
+            if (trainNum == null)
+            {           
+                result.Success = false; 
+                result.Message = "没有找到TrainNum的配置.";
+                return result;
+            }
 
-            if (trainSta != null)
-            {
-                var onlien = trainSta.result_data.FirstOrDefault().online_trains.ToList();
-                var depot = trainSta.result_data.FirstOrDefault().depot_trains.ToList();
-
-                foreach (var item in data)
+            // 使用单个查询来获取警告和故障的数量，按TrainNumber分组  
+            var faultWarnGrouped = faultWarnQuery
+                .GroupBy(x => x.TrainNumber)
+                .Select(g => new
                 {
-                    if (onlien.Contains(item.lch))
-                    {
-                        item.State = 2;
-                    }
+                    TrainNumber = g.Key,
+                    WarnCount = g.Count(x => x.Type == 2),
+                    FaultCount = g.Count(x => x.Type == 1)
+                }).ToList();
+                             
+            int allNum = Convert.ToInt32(trainNum.conval);
+            int warnNum = faultWarnGrouped.Sum(x => x.WarnCount);
+            int faultNum = faultWarnGrouped.Sum(x => x.FaultCount);      
+            int nomalNum = trainStateNum - faultWarnGrouped.Count;         
 
-                    if (depot.Contains(item.lch))
-                    {
-                        item.State = 1;
-                    }
-                }
-                result.Data = data.OrderBy(x => x.lch).ToList();
-                return result;
-            }
-            else
+            var data = new TrainNumDTO
             {
-                result.Data = data;
-                return result;
-            }
+                AllNum = allNum,
+                OnlineNum = trainStateNum,
+                WarnNum = warnNum,
+                FaultNum = faultNum,               
+                NomalNum = nomalNum
+            };
 
+            result.Data = data; 
+            return result;
         }
 
         /// <summary>
@@ -266,7 +289,7 @@ namespace SIV.Controllers
         [Route("GetNEWDATAS")]
         public async Task<PageResult<TB_PARSING_NEWDATAS>> GetNEWDATAS()
         {
-            var config = await _db.Queryable<SYS_Config>().Where(x => x.concode == "FaultSj").FirstAsync();
+            var config = await _db.Queryable<SYS_CONFIG>().Where(x => x.concode == "FaultSj").FirstAsync();
             string sql1 = @"SELECT
 									pd.jz1zhl1dlqgz, 
 									pd.jz1zhl2dlqgz, 
@@ -663,99 +686,99 @@ namespace SIV.Controllers
             return result;
         }
 
-        /// <summary>
-        /// 获取寿命分页信息
-        /// </summary>
-        /// <param name="lch">列车号</param>
-        /// <param name="cxh">车厢号</param>
-        /// <param name="jz">机组</param>
-        /// <param name="name">寿命部件名称</param>
-        /// <param name="sortFile"></param>
-        /// <param name="sortType"></param>
-        /// <param name="pageIndex">页数</param>
-        /// <param name="pageRow">每页行数</param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("GetPartsLife")]
-        public async Task<PageResult<PartsLifeDTO>> GetPartsLife(string? lch, string? cxh, string? jz, string? name, string? gzbj, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
-        {
-            var q = _db.Queryable<PartsLife>();
+        ///// <summary>
+        ///// 获取寿命分页信息
+        ///// </summary>
+        ///// <param name="lch">列车号</param>
+        ///// <param name="cxh">车厢号</param>
+        ///// <param name="jz">机组</param>
+        ///// <param name="name">寿命部件名称</param>
+        ///// <param name="sortFile"></param>
+        ///// <param name="sortType"></param>
+        ///// <param name="pageIndex">页数</param>
+        ///// <param name="pageRow">每页行数</param>
+        ///// <returns></returns>
+        //[HttpGet]
+        //[Route("GetPartsLife")]
+        //public async Task<PageResult<PartsLifeDTO>> GetPartsLife(string? lch, string? cxh, string? jz, string? name, string? gzbj, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
+        //{
+        //    var q = _db.Queryable<PartsLife>();
 
-            if (!string.IsNullOrEmpty(lch))
-            {
-                q = q.Where(a => a.CH == lch);
-            }
-            if (!string.IsNullOrEmpty(cxh))
-            {
-                q = q.Where(a => a.CX == cxh);
-            }
-            if (!string.IsNullOrEmpty(jz))
-            {
-                q = q.Where(a => a.WZ == Convert.ToInt32(jz));
-            }
-            if (!string.IsNullOrEmpty(name))
-            {
-                q = q.Where(a => a.Name == name);
-            }
-            if (!string.IsNullOrEmpty(gzbj))
-            {
-                var dicname = _db.Queryable<TB_SYS_DIC>().Where(x => x.ParentId == "1001" && x.Code == gzbj).First().Name;
+        //    if (!string.IsNullOrEmpty(lch))
+        //    {
+        //        q = q.Where(a => a.CH == lch);
+        //    }
+        //    if (!string.IsNullOrEmpty(cxh))
+        //    {
+        //        q = q.Where(a => a.CX == cxh);
+        //    }
+        //    if (!string.IsNullOrEmpty(jz))
+        //    {
+        //        q = q.Where(a => a.WZ == Convert.ToInt32(jz));
+        //    }
+        //    if (!string.IsNullOrEmpty(name))
+        //    {
+        //        q = q.Where(a => a.Name == name);
+        //    }
+        //    if (!string.IsNullOrEmpty(gzbj))
+        //    {
+        //        var dicname = _db.Queryable<TB_SYS_DIC>().Where(x => x.ParentId == "1001" && x.Code == gzbj).First().Name;
 
-                q = q.Where(a => a.Name == dicname);
-            }
+        //        q = q.Where(a => a.Name == dicname);
+        //    }
 
-            var data = await q.Select(x => new PartsLifeDTO
-            {
-                Id = x.Id,
-                Name = x.Name,
-                XL = x.XL,
-                CH = x.CH,
-                CX = x.CX,
-                WZ = x.WZ,
-                WZName = x.WZ == 1 ? "机组1" : "机组2",
-                Type = x.Type,
-                TypeName = x.Type == "H" ? "时长(小时)" : "次数",
-                RunLife = x.RunLife,
-                RatedLife = x.RatedLife,
-                SurplusLife = (x.RatedLife) - (x.RunLife ?? 0),
-                createtime = x.createtime,
-                updatetime = x.updatetime
-                //Percent = (decimal?)((x.RunLife ?? 0)/(decimal?)x.RatedLife)
+        //    var data = await q.Select(x => new PartsLifeDTO
+        //    {
+        //        Id = x.Id,
+        //        Name = x.Name,
+        //        XL = x.XL,
+        //        CH = x.CH,
+        //        CX = x.CX,
+        //        WZ = x.WZ,
+        //        WZName = x.WZ == 1 ? "机组1" : "机组2",
+        //        Type = x.Type,
+        //        TypeName = x.Type == "H" ? "时长(小时)" : "次数",
+        //        RunLife = x.RunLife,
+        //        RatedLife = x.RatedLife,
+        //        SurplusLife = (x.RatedLife) - (x.RunLife ?? 0),
+        //        createtime = x.createtime,
+        //        updatetime = x.updatetime
+        //        //Percent = (decimal?)((x.RunLife ?? 0)/(decimal?)x.RatedLife)
 
-            }).ToListAsync();
+        //    }).ToListAsync();
 
-            int count = await q.CountAsync();
+        //    int count = await q.CountAsync();
 
-            foreach (var item in data)
-            {
-                if (item.RatedLife != 0) // 假设RatedLife不应为0以避免除以零错误  
-                {
-                    item.Percent = Math.Round((decimal)((item.RunLife * 100) / item.RatedLife), 1);
-                    item.RunLife = Math.Round((decimal)item.RunLife, 1);
-                }
-            }
+        //    foreach (var item in data)
+        //    {
+        //        if (item.RatedLife != 0) // 假设RatedLife不应为0以避免除以零错误  
+        //        {
+        //            item.Percent = Math.Round((decimal)((item.RunLife * 100) / item.RatedLife), 1);
+        //            item.RunLife = Math.Round((decimal)item.RunLife, 1);
+        //        }
+        //    }
 
-            // 增加不分页判断
-            if (pageRow <= 0)
-            {
-                pageRow = count;
-            }
+        //    // 增加不分页判断
+        //    if (pageRow <= 0)
+        //    {
+        //        pageRow = count;
+        //    }
 
-            data = data.OrderByDescending(x => x.Percent)
-              .Skip((pageIndex - 1) * pageRow)
-              .Take(pageRow)
-              .ToList();
+        //    data = data.OrderByDescending(x => x.Percent)
+        //      .Skip((pageIndex - 1) * pageRow)
+        //      .Take(pageRow)
+        //      .ToList();
 
-            //var result = await data.GetPageResultAsync(sortFile, sortType, pageIndex, pageRow);
-            return new PageResult<PartsLifeDTO>
-            {
-                Data = data,
-                Total = count,
-                Success = true,
-                Code = 200,
-                Message = "查询成功"
-            };
-        }
+        //    //var result = await data.GetPageResultAsync(sortFile, sortType, pageIndex, pageRow);
+        //    return new PageResult<PartsLifeDTO>
+        //    {
+        //        Data = data,
+        //        Total = count,
+        //        Success = true,
+        //        Code = 200,
+        //        Message = "查询成功"
+        //    };
+        //}
 
         /// <summary>
         /// 获取故障预警信息
@@ -1104,22 +1127,22 @@ namespace SIV.Controllers
         public async Task<AjaxResult<FaultWarnNum>> GetFaultWarnNum(string? lch)
         {
             var result = new AjaxResult<FaultWarnNum>();
-            var q = await _db.Queryable<FaultOrWarn>().Where(x => Convert.ToDateTime(x.createtime).Date == DateTime.Now.Date).ToListAsync();
+            var q = await _db.Queryable<FaultOrWarn>().Where(x => Convert.ToDateTime(x.CreateTime).Date == DateTime.Now.Date).ToListAsync();
 
             var num = 228;
             if (!string.IsNullOrEmpty(lch))
             {
-                q = q.Where(x => x.lch == lch).ToList();
+                q = q.Where(x => x.TrainNumber == lch).ToList();
                 num = 12;
             }
 
-            var warnNum = q.Where(x => x.Type == "2");
-            var faultNum = q.Where(x => x.Type == "1");
+            var warnNum = q.Where(x => x.Type == 2);
+            var faultNum = q.Where(x => x.Type == 1);
 
             var fault = new FaultWarnNum()
             {
-                SubHealthNum = warnNum.Where(x => x.State == "1").Select(x => x.DeviceCode).Distinct().Count(),
-                UnHealthNum = faultNum.Where(x => x.State == "1").Select(x => x.DeviceCode).Distinct().Count(),
+                SubHealthNum = warnNum.Where(x => x.State == 1).Select(x => x.DeviceCode).Distinct().Count(),
+                UnHealthNum = faultNum.Where(x => x.State == 1).Select(x => x.DeviceCode).Distinct().Count(),
                 WarnSum = warnNum.Count(),
                 FaultSum = faultNum.Count(),
             };
@@ -1130,58 +1153,60 @@ namespace SIV.Controllers
 
         }
 
-        /// <summary>
-        /// 导出寿命数据
-        /// </summary>
-        /// <param name="lch"></param>
-        /// <param name="cxh"></param>
-        /// <param name="jz"></param>
-        /// <param name="name"></param>
-        /// <param name="sortFile"></param>
-        /// <param name="sortType"></param>
-        /// <param name="pageIndex"></param>
-        /// <param name="pageRow"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("GetPartsLife/excel")]
-        public async Task<IActionResult> PartsLifeExcel(string? lch, string? cxh, string? jz, string? name, string? gzbj, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
-        {
-            try
-            {
-                string rptTitle = "部件寿命导出";
-                ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
-                ExcelUtil.Instance().AliasDataSource.Clear();
-                var data = await GetPartsLife(lch, cxh, jz, name, gzbj, sortFile, sortType, pageIndex, pageRow);
-                var dataTable = data.Data.ToDataTable(); // 确保 ToDataTable() 方法存在或正确实现  
-                dataTable.TableName = "PartsLife";
-                //{ rptTitle}
-                //_{ DateTime.Now}
+        ///// <summary>
+        ///// 导出寿命数据
+        ///// </summary>
+        ///// <param name = "lch" ></ param >
+        ///// < param name="cxh"></param>
+        ///// <param name = "jz" ></ param >
+        ///// < param name="name"></param>
+        ///// <param name = "sortFile" ></ param >
+        ///// < param name="sortType"></param>
+        ///// <param name = "pageIndex" ></ param >
+        ///// < param name="pageRow"></param>
+        ///// <returns></returns>
+        //[HttpPost]
+        //[Route("GetPartsLife/excel")]
+        //public async Task<IActionResult> PartsLifeExcel(string? lch, string? cxh, string? jz, string? name, string? gzbj, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
+        //{
+        //    try
+        //    {
+        //        string rptTitle = "部件寿命导出";
+        //        ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
+        //        ExcelUtil.Instance().AliasDataSource.Clear();
+        //        var data = await GetPartsLife(lch, cxh, jz, name, gzbj, sortFile, sortType, pageIndex, pageRow);
+        //        var dataTable = data.Data.ToDataTable(); // 确保 ToDataTable() 方法存在或正确实现  
+        //        dataTable.TableName = "PartsLife";
+        //        { rptTitle}
+        //        _{ DateTime.Now}
 
-                // 调用 Save 方法获取 MemoryStream  
-                using (var stream = ExcelUtil.Instance().Save(dataTable, "部件寿命导出模板"))
-                {
+        //        调用 Save 方法获取 MemoryStream
+        //        using (var stream = ExcelUtil.Instance().Save(dataTable, "部件寿命导出模板"))
+        //        {
 
-                    byte[] excelBytes = new byte[stream.Length];
-                    stream.Read(excelBytes, 0, excelBytes.Length);
+        //            byte[] excelBytes = new byte[stream.Length];
+        //            stream.Read(excelBytes, 0, excelBytes.Length);
 
-                    // 设置文件名  
-                    string fileName = rptTitle + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
+        //            // 设置文件名  
+        //            string fileName = rptTitle + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
 
-                    // 返回文件给客户端  
-                    return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        //            // 返回文件给客户端  
+        //            return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
 
-                }
-            }
-            catch (Exception ex)
-            {
-                // 记录错误或处理异常  
-                // 例如，可以使用日志记录器记录异常  
-                _logger.LogError(ex, "Error occurred while generating Excel file.");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        记录错误或处理异常
+        //        例如，可以使用日志记录器记录异常
+        //        _logger.LogError(ex, "Error occurred while generating Excel file.");
 
-                // 返回一个错误响应  
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the Excel file.");
-            }
-        }
+        //        返回一个错误响应
+        //        return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the Excel file.");
+        //    }
+        //}
+
+
         /// <summary>
         /// 关键数据导出
         /// </summary>
@@ -1250,7 +1275,7 @@ namespace SIV.Controllers
                 ExcelUtil.Instance().AliasDataSource.Clear();
                 var q = await _db.Queryable<FaultOrWarn>().FirstAsync(x => x.Id == id);
 
-                var time = Convert.ToDateTime(q.createtime);
+                var time = Convert.ToDateTime(q.CreateTime);
                 var startTime = time.AddMinutes(-10);
                 var endTime = time.AddMinutes(10);
                 var tabletime = time.ToString("yyyyMMdd");
