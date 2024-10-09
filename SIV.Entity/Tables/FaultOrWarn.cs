@@ -14,19 +14,36 @@ namespace SIV.Entity
     public class FaultOrWarn :BaseEntity
     {
         /// <summary>
+        /// 故障预警名称
+        /// </summary>
+        public string? Name {  get; set; }   
+
+        /// <summary>
         /// 线路名称
         /// </summary>
-        public string? LineName { get; set; }
+        public long? LineId { get; set; }
 
         /// <summary>
         /// 列车号
         /// </summary>
         public string? TrainNumber { get; set; }
+        public long? TrainId { get; set; }
+
+        /// <summary>
+        /// 车型
+        /// </summary>
+        public string? TrainModel { get; set; }
+
+        /// <summary>
+        /// 子系统
+        /// </summary>
+        public string? SubSystem { get; set; }
 
         /// <summary>
         /// 车厢号
         /// </summary>
         public string? CarriageNumber { get; set; }
+        public long? CarriageId { get; set; }
 
         /// <summary>
         /// 设备编号
@@ -34,7 +51,7 @@ namespace SIV.Entity
         public string? DeviceCode { get; set; }
 
         /// <summary>
-        /// 
+        /// 故障编码
         /// </summary>
         public string? Code { get; set; }
 
@@ -42,6 +59,11 @@ namespace SIV.Entity
         /// 类型 1：故障 2：预警
         /// </summary>
         public int Type { get; set; }
+
+        /// <summary>
+        /// 故障预警等级
+        /// </summary>
+        public int Grade { get; set; }
 
         /// <summary>
         /// 状态  0：已处理 1：未处理

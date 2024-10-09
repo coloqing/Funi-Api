@@ -20,6 +20,7 @@ using System.Collections;
 using AutoMapper;
 using SqlSugar.Extensions;
 using SIV.Api;
+using SIV.Entity.Tables;
 
 namespace SIV.Controllers
 {
@@ -34,13 +35,18 @@ namespace SIV.Controllers
         private readonly AppSettings _appSettings;
         private readonly ILogger<TrainController> _logger;
         private readonly IMapper _mapper;
-        private string appId;
-        private string appKey;
-        private string baseUrl;
-        private string lineCode;
+        private string? appId;
+        private string? appKey;
+        private string? baseUrl;
+        private string? lineCode;
 
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="db"></param>
+        /// <param name="mapper"></param>
+        /// <param name="appSettings"></param>
         public TrainController(
             ILogger<TrainController> logger,
             SqlSugarClient db,
@@ -61,55 +67,75 @@ namespace SIV.Controllers
         /// 获取列车状态
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
+        [HttpGet("TrainState")]
         public async Task<AjaxResult<List<TrainState>>> GetHttpTrain()
         {
             var result = new AjaxResult<List<TrainState>>();
-            string sql = @"SELECT
-	                            a.lch
-                            FROM
-	                            dbo.LCH AS a";
-            var data = _db.SqlQueryable<TrainState>(sql).ToList();
-            foreach (var item in data)
-            {
-                item.cxh = item.lch.Substring(0, 2) + "A" + item.lch.Substring(2, 3);
-            }
+
+            var fault = _db.Queryable<FaultOrWarn>().Where(x => x.State == 0);
+            var data = await _db.Queryable<TB_Train>()
+                .LeftJoin(fault,(a,b)=> a.TrainNumber == b.TrainNumber)
+                .Select((a,b) => new TrainState
+                {
+                    Id = a.Id,
+                    TrainNumber = a.TrainNumber,
+                    State = a.State,
+                    FaultNum = fault.Where(x =>x.TrainNumber == b.TrainNumber && x.Type == 1).Count(),
+                    WarnNum = fault.Where(x =>x.TrainNumber == b.TrainNumber && x.Type == 1).Count()                    
+                }).ToListAsync();
+                      
             result.Data = data;
             return result;
 
-            string urlType = "line-statistics";
+        }
 
-            // 构建app_token
-            string appToken = $"app_id={appId}&app_key={appKey}&date=" + DateTime.Now.ToString("yyyy-MM-dd");
-            string tokenMd5 = Helper.GetMD5String(appToken).ToUpper();
-            string url = $"{baseUrl}{urlType}?app_id={appId}&app_token={tokenMd5}&line_code={lineCode}";
-            var trainSta = await HttpClientExample.SendGetRequestAsync<HttpTrainStaDTO>(url);
+        /// <summary>
+        /// 获取列车状态数量
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("TrainStateNum")]
+        public async Task<AjaxResult<TrainNumDTO>> GetHttpTrainNum()
+        {
+            var result = new AjaxResult<TrainNumDTO>();
+            var config = _db.Queryable<SYS_CONFIG>().ToList();
+          
+            var faultWarnQuery = _db.Queryable<FaultOrWarn>().Where(x => x.State == 0).ToList();
+            var trainStateNum = await _db.Queryable<TB_Train>().Where(x => x.State != 0).CountAsync();
 
-            if (trainSta != null)
-            {
-                var onlien = trainSta.result_data.FirstOrDefault().online_trains.ToList();
-                var depot = trainSta.result_data.FirstOrDefault().depot_trains.ToList();
+            var trainNum = config.FirstOrDefault(x => x.concode == "TrainNum");
+            if (trainNum == null)
+            {           
+                result.Success = false; 
+                result.Message = "没有找到TrainNum的配置.";
+                return result;
+            }
 
-                foreach (var item in data)
+            // 使用单个查询来获取警告和故障的数量，按TrainNumber分组  
+            var faultWarnGrouped = faultWarnQuery
+                .GroupBy(x => x.TrainNumber)
+                .Select(g => new
                 {
-                    if (onlien.Contains(item.lch))
-                    {
-                        item.State = 2;
-                    }
+                    TrainNumber = g.Key,
+                    WarnCount = g.Count(x => x.Type == 2),
+                    FaultCount = g.Count(x => x.Type == 1)
+                }).ToList();
+                             
+            int allNum = Convert.ToInt32(trainNum.conval);
+            int warnNum = faultWarnGrouped.Sum(x => x.WarnCount);
+            int faultNum = faultWarnGrouped.Sum(x => x.FaultCount);      
+            int nomalNum = trainStateNum - faultWarnGrouped.Count;         
 
-                    if (depot.Contains(item.lch))
-                    {
-                        item.State = 1;
-                    }
-                }
-                result.Data = data.OrderBy(x => x.lch).ToList();
-                return result;
-            }
-            else
+            var data = new TrainNumDTO
             {
-                result.Data = data;
-                return result;
-            }
+                AllNum = allNum,
+                OnlineNum = trainStateNum,
+                WarnNum = warnNum,
+                FaultNum = faultNum,               
+                NomalNum = nomalNum
+            };
+
+            result.Data = data; 
+            return result;
         }
 
         /// <summary>
@@ -263,7 +289,7 @@ namespace SIV.Controllers
         [Route("GetNEWDATAS")]
         public async Task<PageResult<TB_PARSING_NEWDATAS>> GetNEWDATAS()
         {
-            var config = await _db.Queryable<SYS_Config>().Where(x => x.concode == "FaultSj").FirstAsync();
+            var config = await _db.Queryable<SYS_CONFIG>().Where(x => x.concode == "FaultSj").FirstAsync();
             string sql1 = @"SELECT
 									pd.jz1zhl1dlqgz, 
 									pd.jz1zhl2dlqgz, 
