@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace SIV.Api
 {
-    public class FaultWarnService : BackgroundService
+   /* public class FaultWarnService : BackgroundService
     {
         private readonly AppSettings _appSettings;
         private readonly ILogger<FaultWarnService> _logger;
@@ -280,7 +280,7 @@ namespace SIV.Api
 
 
         }
-    }
+    }*/
 
 }
 

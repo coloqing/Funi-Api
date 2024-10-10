@@ -188,12 +188,22 @@ namespace SIV.Api.Controllers
                 return result;
             }
 
-            user.Name = userInfo.LoginName;
-            user.Avatar = userInfo.Avatar;
+            if (!string.IsNullOrEmpty(userInfo.Name))
+                user.Name = userInfo.Name;
+
+            if (!string.IsNullOrEmpty(userInfo.Avatar))
+                user.Avatar = userInfo.Avatar;
+
             user.UpdatedTime = DateTime.Now;
-            user.Introduction = userInfo.Introduction;
-            user.LoginName = userInfo.LoginName;
-            user.Phone = userInfo.Phone;
+
+            if (!string.IsNullOrEmpty(userInfo.Introduction))
+                user.Introduction = userInfo.Introduction;
+
+            if (!string.IsNullOrEmpty(userInfo.LoginName))
+                user.LoginName = userInfo.LoginName;
+
+            if (!string.IsNullOrEmpty(userInfo.Phone))
+                user.Phone = userInfo.Phone;
 
             var count = sqlSugarClient.Updateable(user).ExecuteCommand();
 
@@ -216,6 +226,7 @@ namespace SIV.Api.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
+        [Authorize]
         public AjaxResult<UserInfo> UserInfo(int id)
         {
             var result = new AjaxResult<UserInfo>();
@@ -391,6 +402,7 @@ namespace SIV.Api.Controllers
         /// <param name="roleId"></param>
         /// <returns></returns>
         [HttpGet("ModRole")]
+        [Authorize]
         public AjaxResult<string> ModRole(int userId, int roleId)
         {
             var result = new AjaxResult<string>();
@@ -426,6 +438,75 @@ namespace SIV.Api.Controllers
 
             result.Success = false;
             result.Message = "更新失败";
+            return result;
+        }
+
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("Delete")]
+        [Authorize]
+        public AjaxResult<string> Delete(DeleteUser duser)
+        {
+            var result = new AjaxResult<string>();
+            result.Code = 200;
+
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            if (string.IsNullOrEmpty(token))
+            {
+                result.Success = false;
+                result.Message = "没有登录";
+                return result;
+            }
+
+            // 如果令牌存在，通常格式为 "Bearer {token}"
+            if (!string.IsNullOrEmpty(token) && token.StartsWith("Bearer "))
+            {
+                token = token["Bearer ".Length..].Trim();
+            }
+
+            var tokenModel = TokenHelper.ResolveToken(token);
+
+            var loginUser = sqlSugarClient.Queryable<User>().Where(x => x.Id == tokenModel.UserID && !x.IsDeleted).ToList().FirstOrDefault();
+
+            if (loginUser == null)
+            {
+                result.Success = false;
+                result.Message = "当前登录用户不存在";
+                return result;
+            }
+
+            var user = sqlSugarClient.Queryable<User>().Where(x => x.Id == duser.Id && !x.IsDeleted).ToList().FirstOrDefault();
+
+            if (user == null)
+            {
+                result.Success = false;
+                result.Message = "用户不存在";
+                return result;
+            }
+
+            if (loginUser.LoginName != "admin" && loginUser.Id != duser.Id)
+            {
+                result.Success = false;
+                result.Message = "没有权限访问此用户数据";
+                return result;
+            }
+
+            user.IsDeleted = true;
+            user.UpdatedTime = DateTime.Now;
+
+            var count = sqlSugarClient.Updateable(user).ExecuteCommand();
+
+            if (count > 0)
+            {
+                result.Success = true;
+                result.Message = "删除成功";
+                return result;
+            }
+
+            result.Success = false;
+            result.Message = "删除失败";
             return result;
         }
 
@@ -481,5 +562,10 @@ namespace SIV.Api.Controllers
         public string Password { get; set; }
         [Required]
         public string NewPassword { get; set; }
+    }
+
+    public class DeleteUser
+    {
+        public int Id { get; set; }
     }
 }

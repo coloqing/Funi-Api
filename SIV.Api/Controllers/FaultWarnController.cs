@@ -98,7 +98,7 @@ namespace SIV.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet]
+        [HttpGet("FaultInfo")]
         public async Task<AjaxResult<FaultOrWarn>> GetTheData(long? id)
         {
             if (id != null)

@@ -17,14 +17,14 @@ namespace SIV.Entity
         /// </summary>
         [JsonIgnore]
         [MaxLength(50)]
-        public String? CreateUser { get; set; }
+        public int? CreateUserId { get; set; }
 
         /// <summary>
         /// 修改人
         /// </summary>
         [JsonIgnore]
         [MaxLength(50)]
-        public String? UpdateUser { get; set; }
+        public int? UpdateUserId { get; set; }
 
         /// <summary>
         /// 创建时间
@@ -42,6 +42,6 @@ namespace SIV.Entity
         /// 是否删除 0：未删除 1：已删除
         /// </summary>
         [JsonIgnore]
-        public int IsDelete { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }

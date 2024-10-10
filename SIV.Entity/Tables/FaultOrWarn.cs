@@ -21,13 +21,13 @@ namespace SIV.Entity
         /// <summary>
         /// 线路名称
         /// </summary>
-        public long? LineId { get; set; }
+        public int? LineId { get; set; }
 
         /// <summary>
         /// 列车号
         /// </summary>
         public string? TrainNumber { get; set; }
-        public long? TrainId { get; set; }
+        public int? TrainId { get; set; }
 
         /// <summary>
         /// 车型
@@ -43,7 +43,7 @@ namespace SIV.Entity
         /// 车厢号
         /// </summary>
         public string? CarriageNumber { get; set; }
-        public long? CarriageId { get; set; }
+        public int? CarriageId { get; set; }
 
         /// <summary>
         /// 设备编号
