@@ -11,7 +11,7 @@ using SIV.Util;
 using System.DirectoryServices.Protocols;
 
 namespace SIV.Api.Controllers
-{   
+{
     /// <summary>
     /// 故障预警
     /// </summary>
@@ -23,7 +23,7 @@ namespace SIV.Api.Controllers
         private readonly AppSettings _appSettings;
         private readonly ILogger<TrainController> _logger;
         private readonly IMapper _mapper;
-       
+
 
         /// <summary>
         /// 
@@ -42,48 +42,18 @@ namespace SIV.Api.Controllers
             _db = db;
             _appSettings = appSettings;
             _mapper = mapper;
-          
+
         }
 
         /// <summary>
         /// 获取故障预警列表
-        /// </summary>
-        /// <param name="name">预警/报警名称</param>
-        /// <param name="type">类型</param>
-        /// <param name="state">状态</param>
-        /// <param name="lineId">线路Id</param>
-        /// <param name="trainId">列车Id</param>
-        /// <param name="carriageId">车厢Id</param>
-        /// <param name="itemSys">子系统</param>
-        /// <param name="startTime">开始时间</param>
-        /// <param name="endTime">结束时间</param>
-        /// <param name="sortFile">排序字段</param>
-        /// <param name="sortType">排序类型</param>
-        /// <param name="pageIndex">页数</param>
-        /// <param name="pageRow">每页行数</param>
+        /// </summary>     
         /// <returns></returns>
         [HttpGet]
-        public async Task<PageResult<FaultOrWarn>> GetData(string? name,int? type, int? state, long? lineId, long? trainId,long? carriageId, string? itemSys,DateTime? startTime,DateTime? endTime, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
+        public async Task<PageResult<FaultOrWarn>> GetData(string? sortFile = "CreateTime", string? sortType = "desc", int pageIndex = 1, int pageRow = 7)
         {
-            var where = Expressionable.Create<FaultOrWarn>();
-            if (name != null)
-                where.And(c => c.Name.Contains(name));
-            if (type != null)
-                where.And(c => c.Type == type);
-            if (state != null)
-                where.And(c => c.State == state);
-            if (lineId != null)
-                where.And(c => c.LineId == lineId);
-            if (trainId != null)
-                where.And(c => c.TrainId == trainId);
-            if (carriageId != null)
-                where.And(c => c.CarriageId == carriageId);
-            if (itemSys != null)
-                where.And(c => c.SubSystem == itemSys);
-            if (startTime != null)
-                where.And(c => c.CreateTime >= startTime);
-            if (endTime != null)
-                where.And(c => c.EndTime <= endTime);
+            var where = Expressionable.Create<FaultOrWarn>().And(x => !x.IsDeleted);
+
             var exp = where.ToExpression();
 
             var fault = _db.Queryable<FaultOrWarn>().Where(exp);

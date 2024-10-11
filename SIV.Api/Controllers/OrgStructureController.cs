@@ -34,8 +34,9 @@ namespace SIV.Api.Controllers
             {
                 Id = item.Id,
                 Name = item.Name,
-                Childrens = new List<OrgStructureDTO>()
-            }; 
+                Time = item.UpdatedTime,
+                Children = new List<OrgStructureDTO>()
+            };
 
             FindChildrens(ref orgStructure, data);
 
@@ -48,19 +49,22 @@ namespace SIV.Api.Controllers
         public void FindChildrens(ref OrgStructureDTO orgStructure, List<OrgStructure> list)
         {
             var id = orgStructure.Id;
+
             foreach (var item in list.Where(x => x.ParentId == id))
             {
                 var child = new OrgStructureDTO
                 {
                     Id = item.Id,
                     Name = item.Name,
-                    Childrens = new List<OrgStructureDTO>()
+                    Time = item.UpdatedTime
                 };
 
-                FindChildrens(ref child,list);  
-                
-                orgStructure.Childrens.Add(child);
-            }  
+                FindChildrens(ref child, list);
+
+                orgStructure.Children ??= new List<OrgStructureDTO>();
+                orgStructure.Children.Add(child);
+            }
+
         }
 
         /// <summary>
@@ -101,7 +105,8 @@ namespace SIV.Api.Controllers
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public List<OrgStructureDTO> Childrens { get; set; }
+        public DateTime Time { get; set; }
+        public List<OrgStructureDTO> Children { get; set; }
     }
 
 }

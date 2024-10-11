@@ -102,7 +102,7 @@ namespace SIV.Api.Controllers
 
             dbline.UpdatedTime = DateTime.Now;
 
-            var count = db.Updateable(lineDTO).ExecuteCommand();
+            var count = db.Updateable(dbline).ExecuteCommand();
 
             var result = new AjaxResult<string>();
 

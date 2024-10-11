@@ -44,12 +44,17 @@ namespace SIV.Api.Controllers
         }
 
         [HttpGet]
-        public AjaxResult<List<Train>> Get()
+        public AjaxResult<List<Train>> Get(int? lineId = default)
         {
             var result = new AjaxResult<List<Train>>();
             result.Code = 200;
 
-            result.Data = sqlSugarClient.Queryable<Train>().ToList();
+            var exp = Expressionable.Create<Train>().And(x => !x.IsDeleted);
+
+            if (lineId != default)
+                exp.And(x => x.LineId == lineId);
+
+            result.Data = sqlSugarClient.Queryable<Train>().Where(exp.ToExpression()).ToList();
 
             return result;
         }
@@ -92,7 +97,7 @@ namespace SIV.Api.Controllers
             var result = new AjaxResult<string>();
             result.Success = false;
             result.Code = 200;
-             
+
             train.UpdatedTime = DateTime.Now;
 
             var count = sqlSugarClient.Updateable(train).ExecuteCommand();
