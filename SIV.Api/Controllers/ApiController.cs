@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SIV.Api.Authorization.Models;
 using SqlSugar;
 using Util.DTO;
+using SIV.Util;
+using SIV.Entity;
 
 namespace SIV.Api.Controllers
 {
@@ -20,14 +21,14 @@ namespace SIV.Api.Controllers
         /// <summary>
         /// 获取所有api信息
         /// </summary>
+        /// <param name="pageIndex">页数</param>
+        /// <param name="pageRow">行数</param>
         /// <returns></returns>
         [HttpGet]
-        public AjaxResult<List<ApiModel>> Get()
+        public async Task<PageResult<ApiModel>> Get(int? pageIndex = 1, int? pageRow = 10)
         {
-            var result = new AjaxResult<List<ApiModel>>();
-            result.Code = 200;
-            result.Success = true;
-            result.Data =  sqlSugarClient.Queryable<ApiModel>().ToList();
+            var query = sqlSugarClient.Queryable<ApiModel>().Where(x => !x.IsDeleted);
+            var result = await query.GetPageResultAsync("createTime", "desc", pageIndex.Value, pageRow.Value);
 
             return result;
         }

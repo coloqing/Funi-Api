@@ -74,5 +74,7 @@ namespace SIV.Entity
         /// 结束时间
         /// </summary>
         public DateTime? EndTime { get; set; }
+        public string? DiagnoseLogic { get; set; }
+        public string? Solution { get; set; }
     }
 }

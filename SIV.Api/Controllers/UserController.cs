@@ -9,6 +9,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Text;
 using Util.DTO;
+using SIV.Util;
+using SIV.Api.DTO;
 
 namespace SIV.Api.Controllers
 {
@@ -33,13 +35,10 @@ namespace SIV.Api.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpGet("All")]
-        public AjaxResult<List<User>> GetAllUser()
+        public async Task<PageResult<User>> GetAllUser(int? pageIndex = 1, int? pageRow = 10)
         {
-            var result = new AjaxResult<List<User>>();
-            result.Code = 200;
-
-            result.Data = sqlSugarClient.Queryable<User>().Where(x => !x.IsDeleted).ToList();
-
+            var query = sqlSugarClient.Queryable<User>().Where(x => !x.IsDeleted);
+            var result = await query.GetPageResultAsync("createTime", "desc", pageIndex.Value, pageRow.Value);
             return result;
         }
 
@@ -194,7 +193,7 @@ namespace SIV.Api.Controllers
             if (!string.IsNullOrEmpty(userInfo.Avatar))
                 user.Avatar = userInfo.Avatar;
 
-            user.UpdatedTime = DateTime.Now;
+            user.UpdateTime = DateTime.Now;
 
             if (!string.IsNullOrEmpty(userInfo.Introduction))
                 user.Introduction = userInfo.Introduction;
@@ -380,8 +379,8 @@ namespace SIV.Api.Controllers
                 Name = model.LoginName,
                 LoginName = model.LoginName,
                 Password = ps,
-                CreatedTime = DateTime.Now,
-                UpdatedTime = DateTime.Now,
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
                 RoleId = role.Id,
                 Phone = model.Phone,
                 Avatar = model.Avatar,
@@ -425,7 +424,7 @@ namespace SIV.Api.Controllers
             }
 
             user.RoleId = roleId;
-            user.UpdatedTime = DateTime.Now;
+            user.UpdateTime = DateTime.Now;
 
             var count = sqlSugarClient.Updateable(user).ExecuteCommand();
 
@@ -494,7 +493,7 @@ namespace SIV.Api.Controllers
             }
 
             user.IsDeleted = true;
-            user.UpdatedTime = DateTime.Now;
+            user.UpdateTime = DateTime.Now;
 
             var count = sqlSugarClient.Updateable(user).ExecuteCommand();
 

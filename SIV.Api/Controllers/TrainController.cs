@@ -6,7 +6,12 @@ using SIV.Api.Authorization.Models;
 using SIV.Api.DTO;
 using SqlSugar;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using Util.DTO;
+using SIV.Util;
+using SIV.Api.Models;
+using AutoMapper;
+using Aspose.Cells.Charts;
 
 namespace SIV.Api.Controllers
 {
@@ -15,10 +20,18 @@ namespace SIV.Api.Controllers
     public class TrainController : ControllerBase
     {
         private readonly SqlSugarClient sqlSugarClient;
+        private IMapper mapper;
 
         public TrainController(SqlSugarClient sqlSugarClient)
         {
             this.sqlSugarClient = sqlSugarClient;
+
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<TrainDTO, Train>().ReverseMap().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+            }
+          );
+            mapper = config.CreateMapper();
         }
 
         /// <summary>
@@ -44,19 +57,24 @@ namespace SIV.Api.Controllers
         }
 
         [HttpGet]
-        public AjaxResult<List<Train>> Get(int? lineId = default)
+        public async Task<PageResult<TrainDTO>> Get(int? lineId = default, int? pageIndex = 1, int? pageRow = 10)
         {
-            var result = new AjaxResult<List<Train>>();
-            result.Code = 200;
-
             var exp = Expressionable.Create<Train>().And(x => !x.IsDeleted);
 
             if (lineId != default)
                 exp.And(x => x.LineId == lineId);
 
-            result.Data = sqlSugarClient.Queryable<Train>().Where(exp.ToExpression()).ToList();
+            var query = sqlSugarClient.Queryable<Train>().Where(exp.ToExpression());
+            var result = await query.GetPageResultAsync("createTime", "desc", pageIndex.Value, pageRow.Value);
 
-            return result;
+            return new PageResult<TrainDTO>
+            {
+                Data = mapper.Map<List<TrainDTO>>(result.Data),
+                Total = result.Total,
+                Success = true,
+                Code = 200,
+                Message = "查询成功"
+            };
         }
 
         /// <summary>
@@ -65,16 +83,18 @@ namespace SIV.Api.Controllers
         /// <param name="train"></param>
         /// <returns></returns>
         [HttpPost]
-        public AjaxResult<string> Add(Train train)
+        public AjaxResult<string> Add(TrainDTO train)
         {
             var result = new AjaxResult<string>();
             result.Success = false;
             result.Code = 200;
 
-            train.CreatedTime = DateTime.Now;
-            train.UpdatedTime = DateTime.Now;
+            var dbtrain = mapper.Map<Train>(train);
 
-            var count = sqlSugarClient.Insertable(train).ExecuteCommand();
+            dbtrain.CreateTime = DateTime.Now;
+            dbtrain.UpdateTime = DateTime.Now;
+
+            var count = sqlSugarClient.Insertable(dbtrain).ExecuteCommand();
 
             if (count > 0)
             {
@@ -92,15 +112,19 @@ namespace SIV.Api.Controllers
         /// <param name="train"></param>
         /// <returns></returns>
         [HttpPost("Update")]
-        public AjaxResult<string> Update(Train train)
+        public AjaxResult<string> Update(TrainDTO train)
         {
             var result = new AjaxResult<string>();
             result.Success = false;
             result.Code = 200;
 
-            train.UpdatedTime = DateTime.Now;
+            var dbtrain = sqlSugarClient.Queryable<Train>().Where(x => !x.IsDeleted && x.Id == train.Id).First();
 
-            var count = sqlSugarClient.Updateable(train).ExecuteCommand();
+            mapper.Map(train, dbtrain);
+
+            dbtrain.UpdateTime = DateTime.Now;
+
+            var count = sqlSugarClient.Updateable(dbtrain).ExecuteCommand();
 
             if (count > 0)
             {
@@ -109,6 +133,99 @@ namespace SIV.Api.Controllers
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 获取寿命分页信息
+        /// </summary>
+        /// <param name="lch">列车号</param>
+        /// <param name="cxh">车厢号</param>
+        /// <param name="jz">机组</param>
+        /// <param name="name">寿命部件名称</param>
+        /// <param name="sortFile"></param>
+        /// <param name="sortType"></param>
+        /// <param name="pageIndex">页数</param>
+        /// <param name="pageRow">每页行数</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetPartsLife")]
+        public async Task<PageResult<PartsLifeDTO>> GetPartsLife(string? lch, string? cxh, string? jz, string? name, string? gzbj, string sortFile = "Percent", string sortType = "desc", int pageIndex = 1, int pageRow = 20)
+        {
+            var q = sqlSugarClient.Queryable<PartsLifeDTO>();
+
+            if (!string.IsNullOrEmpty(lch))
+            {
+                q = q.Where(a => a.CH == lch);
+            }
+            if (!string.IsNullOrEmpty(cxh))
+            {
+                q = q.Where(a => a.CX == cxh);
+            }
+            if (!string.IsNullOrEmpty(jz))
+            {
+                q = q.Where(a => a.WZ == Convert.ToInt32(jz));
+            }
+            if (!string.IsNullOrEmpty(name))
+            {
+                q = q.Where(a => a.Name == name);
+            }
+            //if (!string.IsNullOrEmpty(gzbj))
+            //{
+            //    var dicname = sqlSugarClient.Queryable<TB_SYS_DIC>().Where(x => x.ParentId == "1001" && x.Code == gzbj).First().Name;
+            //    q = q.Where(a => a.Name == dicname);
+            //}
+
+            var data = await q.Select(x => new PartsLifeDTO
+            {
+                Id = x.Id,
+                Name = x.Name,
+                XL = x.XL,
+                CH = x.CH,
+                CX = x.CX,
+                WZ = x.WZ,
+                WZName = x.WZ == 1 ? "机组1" : "机组2",
+                Type = x.Type,
+                TypeName = x.Type == "H" ? "时长(小时)" : "次数",
+                RunLife = x.RunLife,
+                RatedLife = x.RatedLife,
+                SurplusLife = (x.RatedLife) - (x.RunLife ?? 0),
+                createtime = x.createtime,
+                updatetime = x.updatetime
+                //Percent = (decimal?)((x.RunLife ?? 0)/(decimal?)x.RatedLife)
+
+            }).ToListAsync();
+
+            int count = await q.CountAsync();
+
+            foreach (var item in data)
+            {
+                if (item.RatedLife != 0) // 假设RatedLife不应为0以避免除以零错误  
+                {
+                    item.Percent = Math.Round((decimal)((item.RunLife * 100) / item.RatedLife), 1);
+                    item.RunLife = Math.Round((decimal)item.RunLife, 1);
+                }
+            }
+
+            // 增加不分页判断
+            if (pageRow <= 0)
+            {
+                pageRow = count;
+            }
+
+            data = data.OrderByDescending(x => x.Percent)
+              .Skip((pageIndex - 1) * pageRow)
+              .Take(pageRow)
+              .ToList();
+
+            //var result = await data.GetPageResultAsync(sortFile, sortType, pageIndex, pageRow);
+            return new PageResult<PartsLifeDTO>
+            {
+                Data = data,
+                Total = count,
+                Success = true,
+                Code = 200,
+                Message = "查询成功"
+            };
         }
     }
 }

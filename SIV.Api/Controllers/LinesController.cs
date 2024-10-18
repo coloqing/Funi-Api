@@ -7,6 +7,8 @@ using SqlSugar;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Util.DTO;
+using SIV.Util;
+using SIV.Api.Models;
 
 namespace SIV.Api.Controllers
 {
@@ -14,18 +16,18 @@ namespace SIV.Api.Controllers
     [ApiController]
     public class LinesController : ControllerBase
     {
-        private readonly ISqlSugarClient db;
+        private readonly ISqlSugarClient sqlSugarClient;
         private IMapper mapper;
 
         public LinesController(SqlSugarClient db)
         {
-            this.db = db;
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<LineDTO, LineDTO>()
-            .ForMember(x=>x.CreatedTime,op=>op.Ignore())
-            .ForMember(x=>x.UpdatedTime,op=>op.Ignore())
-            .ForMember(x=>x.IsDeleted,op=>op.Ignore())
-            .ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null))
-            );
+            this.sqlSugarClient = db;
+            
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<LineDTO, Line>().ReverseMap().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+            }
+           );
             mapper = config.CreateMapper();
         }
 
@@ -37,25 +39,28 @@ namespace SIV.Api.Controllers
         /// <param name="city">市</param>
         /// <returns></returns>
         [HttpGet]
-        public AjaxResult<List<LineDTO>> GetLines(string? lineId = default, string? province = default, string? city = default)
+        public async Task<PageResult<LineDTO>> GetLines(string? lineId = default, string? province = default, string? city = default, int? pageIndex = 1, int? pageRow = 10) 
         {
-            var expression = Expressionable.Create<LineDTO>();
+            var expression = Expressionable.Create<Line>();
             if (!string.IsNullOrEmpty(lineId))
                 expression.And(x => x.LineId == lineId);
             if (!string.IsNullOrEmpty(province))
                 expression.And(x => x.Province == province);
             if (!string.IsNullOrEmpty(city))
                 expression.And(x => x.City == city);
-            expression.And(x => !x.IsDeleted);
+            expression.And(x => !x.IsDeleted); 
 
-            var list = db.Queryable<LineDTO>().Where(expression.ToExpression()).ToList(); 
+            var query = sqlSugarClient.Queryable<Line>().Where(expression.ToExpression());
+            var result = await query.GetPageResultAsync("createTime", "desc", pageIndex.Value, pageRow.Value);
 
-            var result = new AjaxResult<List<LineDTO>>();
-            result.Code = 200;
-            result.Data = list;
-            result.Success = true;
-
-            return result;
+            return new PageResult<LineDTO>
+            {
+                Data = mapper.Map<List<LineDTO>>(result.Data),
+                Total = result.Total,
+                Success = true,
+                Code = 200,
+                Message = "查询成功"
+            };
         }
 
         /// <summary>
@@ -66,11 +71,14 @@ namespace SIV.Api.Controllers
         [HttpPost]
         public IActionResult Add(LineDTO lineDTO)
         {
-            lineDTO.LineId = lineDTO.Name;
-            lineDTO.IsDeleted = false;
-            lineDTO.CreatedTime = DateTime.Now;
-            lineDTO.UpdatedTime = DateTime.Now;
-            var count = db.Insertable(lineDTO).ExecuteCommand();
+            var line = mapper.Map<Line>(lineDTO);
+
+            line.LineId = lineDTO.Name;
+            line.IsDeleted = false;
+            line.CreateTime = DateTime.Now;
+            line.UpdateTime = DateTime.Now;
+
+            var count = sqlSugarClient.Insertable(line).ExecuteCommand();
 
             var result = new AjaxResult<string>();
 
@@ -96,13 +104,13 @@ namespace SIV.Api.Controllers
         [HttpPost("Update")]
         public IActionResult Update(LineDTO lineDTO)
         { 
-            var dbline = db.Queryable<LineDTO>().First(x=>x.Id == lineDTO.Id);
+            var dbline = sqlSugarClient.Queryable<Line>().First(x=>x.Id == lineDTO.Id);
 
             mapper.Map(lineDTO, dbline);
 
-            dbline.UpdatedTime = DateTime.Now;
+            dbline.UpdateTime = DateTime.Now;
 
-            var count = db.Updateable(dbline).ExecuteCommand();
+            var count = sqlSugarClient.Updateable(dbline).ExecuteCommand();
 
             var result = new AjaxResult<string>();
 

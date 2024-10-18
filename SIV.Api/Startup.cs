@@ -101,7 +101,7 @@ namespace SIV.Api
         {
 
 
-            if (env.IsDevelopment())
+            if (env.IsDevelopment() || true)
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();

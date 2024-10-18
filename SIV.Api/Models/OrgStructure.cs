@@ -1,6 +1,6 @@
 ﻿using SqlSugar;
 
-namespace SIV.Api.DTO
+namespace SIV.Api.Models 
 { 
     [SugarTable("OrgStructure")]
     public class OrgStructure
@@ -10,8 +10,8 @@ namespace SIV.Api.DTO
         public string Name { get; set; }
         public int ParentId { get; set; }
         public int Order { get; set; }
-        public DateTime CreatedTime { get; set; }
-        public DateTime UpdatedTime { get; set; }
+        public DateTime CreateTime { get; set; }
+        public DateTime UpdateTime { get; set; }
         public bool IsDeleted { get; set; }
     }
 }

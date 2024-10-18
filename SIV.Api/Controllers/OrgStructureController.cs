@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SIV.Api.DTO;
+using SIV.Api.Models;
 using SqlSugar;
 using Util.DTO;
 
@@ -14,54 +16,68 @@ namespace SIV.Api.Controllers
     public class OrgStructureController : ControllerBase
     {
         private readonly SqlSugarClient sqlSugarClient;
+        private IMapper mapper;
 
         public OrgStructureController(SqlSugarClient sqlSugarClient)
         {
             this.sqlSugarClient = sqlSugarClient;
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<OrgStructureDTO, OrgStructure>().ReverseMap().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+            }
+           );
+            mapper = config.CreateMapper();
         }
 
         [HttpGet]
-        public AjaxResult<OrgStructureDTO> Get()
+        public AjaxResult<List<OrgStructureVO>> Get()
         {
-            var result = new AjaxResult<OrgStructureDTO>();
+            var result = new AjaxResult<List<OrgStructureVO>>();
             result.Code = 200;
 
             var data = sqlSugarClient.Queryable<OrgStructure>().Where(x => !x.IsDeleted).ToList();
 
-            var item = data.First(x => x.ParentId == 0);
+            var list = data.Where(x => x.ParentId == 0);
 
-            var orgStructure = new OrgStructureDTO
+            result.Data = new List<OrgStructureVO>();
+
+            foreach (var item in list)
             {
-                Id = item.Id,
-                Name = item.Name,
-                Time = item.UpdatedTime,
-                Children = new List<OrgStructureDTO>()
-            };
+                var orgStructure = new OrgStructureVO
+                {
+                    Id = item.Id,
+                    Name = item.Name,
+                    Order = item.Order,
+                    Time = item.UpdateTime,
+                    Children = new List<OrgStructureVO>()
+                };
+                FindChildrens(ref orgStructure, data);
 
-            FindChildrens(ref orgStructure, data);
-
-            result.Data = orgStructure;
+                result.Data.Add(orgStructure);
+            }
+             
             result.Success = true;
             return result;
         }
 
         [NonAction]
-        public void FindChildrens(ref OrgStructureDTO orgStructure, List<OrgStructure> list)
+        public void FindChildrens(ref OrgStructureVO orgStructure, List<OrgStructure> list)
         {
             var id = orgStructure.Id;
 
             foreach (var item in list.Where(x => x.ParentId == id))
             {
-                var child = new OrgStructureDTO
+                var child = new OrgStructureVO
                 {
                     Id = item.Id,
                     Name = item.Name,
-                    Time = item.UpdatedTime
+                    Order = item.Order,
+                    Time = item.UpdateTime
                 };
 
                 FindChildrens(ref child, list);
 
-                orgStructure.Children ??= new List<OrgStructureDTO>();
+                orgStructure.Children ??= new List<OrgStructureVO>();
                 orgStructure.Children.Add(child);
             }
 
@@ -70,16 +86,31 @@ namespace SIV.Api.Controllers
         /// <summary>
         /// 添加组织
         /// </summary>
-        /// <param name="orgStructure"></param>
+        /// <param name="orgStructuredto"></param>
         /// <returns></returns>
         [HttpPost]
-        public AjaxResult<string> Add(OrgStructure orgStructure)
+        public AjaxResult<string> Add(OrgStructureDTO orgStructuredto)
         {
             var result = new AjaxResult<string>();
             result.Code = 200;
 
+            var orgStructure = mapper.Map<OrgStructure>(orgStructuredto);
 
+            orgStructure.CreateTime = DateTime.Now;
+            orgStructure.UpdateTime = DateTime.Now;
+            orgStructure.IsDeleted = false;
 
+            var count = sqlSugarClient.Insertable(orgStructure).ExecuteCommand();
+
+            if (count > 0)
+            {
+                result.Success = true;
+                result.Message = "添加成功";
+                return result;
+            }
+
+            result.Success = false;
+            result.Message = "添加失败";
             return result;
         }
 
@@ -89,24 +120,40 @@ namespace SIV.Api.Controllers
         /// <param name="orgStructure"></param>
         /// <returns></returns>
         [HttpPost("Update")]
-        public AjaxResult<string> Update(OrgStructure orgStructure)
+        public AjaxResult<string> Update(OrgStructureDTO orgStructure)
         {
             var result = new AjaxResult<string>();
             result.Code = 200;
 
+            var dbOrgStructure = sqlSugarClient.Queryable<OrgStructure>().First(x => x.Id == orgStructure.Id && !x.IsDeleted);
 
+            mapper.Map(orgStructure, dbOrgStructure);
 
+            dbOrgStructure.UpdateTime = DateTime.Now; 
+
+            var count = sqlSugarClient.Updateable(dbOrgStructure).ExecuteCommand();
+
+            if (count > 0)
+            {
+                result.Success = true;
+                result.Message = "更新成功";
+                return result;
+            }
+
+            result.Success = false;
+            result.Message = "更新失败";
             return result;
         }
 
     }
 
-    public class OrgStructureDTO
+    public class OrgStructureVO
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public int Order { get; set; }
         public DateTime Time { get; set; }
-        public List<OrgStructureDTO> Children { get; set; }
+        public List<OrgStructureVO> Children { get; set; }
     }
 
 }
