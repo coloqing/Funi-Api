@@ -22,6 +22,14 @@ namespace SIV.Api.Models
         /// 信号类型：Analog = 模拟量 Digital = 数字量
         /// </summary>
         public string Type { get; set; }
+        /// <summary>
+        /// 最大值
+        /// </summary>
+        public float Max { get; set; }
+        /// <summary>
+        /// 最小值
+        /// </summary>
+        public float Min { get; set; }
         [JsonIgnore]
         public DateTime CreateTime { get; set; } = DateTime.Now;
         [JsonIgnore]

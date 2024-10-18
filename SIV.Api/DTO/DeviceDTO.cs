@@ -1,7 +1,7 @@
 ﻿using SqlSugar;
 
 namespace SIV.Api.DTO
-{ 
+{
     public class DeviceDTO
     {  
         public int Id { get; set; }
@@ -14,16 +14,8 @@ namespace SIV.Api.DTO
         /// </summary>
         public string SN { get; set; }
         /// <summary>
-        /// 列车号
+        /// 关联部件id，逗号分割
         /// </summary>
-        public string TrainNum { get; set; }
-        /// <summary>
-        /// 车厢类型
-        /// </summary>
-        public string CoachType { get; set; }
-        /// <summary>
-        /// 线路名称
-        /// </summary>
-        public string LineName { get; set; } 
+        public string ComponentIds { get; set; }
     }
 }

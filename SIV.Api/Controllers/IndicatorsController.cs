@@ -2,41 +2,50 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SIV.Api.DTO;
+using SIV.Api.Models;
 using SqlSugar;
 using SIV.Util;
 using Util.DTO;
-using SIV.Api.Models;
 
 namespace SIV.Api.Controllers
 {
+    /// <summary>
+    /// 性能指标
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
-    public class DeviceController : ControllerBase
+    public class IndicatorsController : ControllerBase
     {
         private readonly SqlSugarClient sqlSugarClient;
         private IMapper mapper;
 
-        public DeviceController(SqlSugarClient sqlSugarClient)
+        public IndicatorsController(SqlSugarClient sqlSugarClient)
         {
             this.sqlSugarClient = sqlSugarClient;
 
             var config = new MapperConfiguration(cfg =>
-                {
-                    cfg.CreateMap<DeviceDTO, Device>().ReverseMap().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
-                }
+            {
+                cfg.CreateMap<IndicatorsDTO, Indicators>().ReverseMap().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+            }
             );
             mapper = config.CreateMapper();
         }
 
+        /// <summary>
+        /// 获取性能指标数据
+        /// </summary>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageRow"></param>
+        /// <returns></returns>
         [HttpGet]
-        public async Task<PageResult<DeviceDTO>> Get(int? pageIndex = 1, int? pageRow = 10)
-        { 
-            var query = sqlSugarClient.Queryable<Device>().Where(x => !x.IsDeleted);
+        public async Task<PageResult<IndicatorsDTO>> Get(int? pageIndex = 1, int? pageRow = 10)
+        {
+            var query = sqlSugarClient.Queryable<Indicators>().Where(x => !x.IsDeleted);
             var result = await query.GetPageResultAsync("createTime", "desc", pageIndex.Value, pageRow.Value);
 
-            return new PageResult<DeviceDTO>
+            return new PageResult<IndicatorsDTO>
             {
-                Data = mapper.Map<List<DeviceDTO>>(result.Data),
+                Data = mapper.Map<List<IndicatorsDTO>>(result.Data),
                 Total = result.Total,
                 Success = true,
                 Code = 200,
@@ -47,21 +56,21 @@ namespace SIV.Api.Controllers
         /// <summary>
         /// 添加
         /// </summary>
-        /// <param name="device"></param>
+        /// <param name="indicators"></param>
         /// <returns></returns>
         [HttpPost]
-        public AjaxResult<string> Post([FromBody] DeviceDTO device)
+        public AjaxResult<string> Post([FromBody] IndicatorsDTO indicators)
         {
             var result = new AjaxResult<string>();
             result.Code = 200;
 
-            var dbdevice = mapper.Map<Device>(device);
+            var dbindicators = mapper.Map<Indicators>(indicators);
 
-            dbdevice.CreateTime = DateTime.Now;
-            dbdevice.UpdateTime = DateTime.Now;
-            dbdevice.IsDeleted = false;
+            dbindicators.CreateTime = DateTime.Now;
+            dbindicators.UpdateTime = DateTime.Now;
+            dbindicators.IsDeleted = false;
 
-            var count = sqlSugarClient.Insertable(dbdevice).ExecuteCommand();
+            var count = sqlSugarClient.Insertable(dbindicators).ExecuteCommand();
 
             if (count > 0)
             {
@@ -80,21 +89,21 @@ namespace SIV.Api.Controllers
         /// <summary>
         /// 更新
         /// </summary>
-        /// <param name="device"></param>
+        /// <param name="indicators"></param>
         /// <returns></returns>
         [HttpPost("Update")]
-        public AjaxResult<string> Update(DeviceDTO device)
+        public AjaxResult<string> Update(IndicatorsDTO indicators)
         {
             var result = new AjaxResult<string>();
             result.Code = 200;
 
-            var dbdevice = sqlSugarClient.Queryable<Device>().First(x => x.Id == device.Id && !x.IsDeleted);
+            var dbindicators = sqlSugarClient.Queryable<Indicators>().First(x => x.Id == indicators.Id && !x.IsDeleted);
 
-            mapper.Map(device, dbdevice);
+            mapper.Map(indicators, dbindicators);
 
-            dbdevice.UpdateTime = DateTime.Now;
+            dbindicators.UpdateTime = DateTime.Now;
 
-            var count = sqlSugarClient.Updateable(dbdevice).ExecuteCommand();
+            var count = sqlSugarClient.Updateable(dbindicators).ExecuteCommand();
 
             if (count > 0)
             {
@@ -113,20 +122,20 @@ namespace SIV.Api.Controllers
         /// <summary>
         /// 删除
         /// </summary>
-        /// <param name="dDevice"></param>
+        /// <param name="deleteEntityId"></param>
         /// <returns></returns>
         [HttpPost("Delete")]
-        public AjaxResult<string> Delete(DeleteDevice dDevice)
+        public AjaxResult<string> Delete(DeleteEntityId deleteEntityId)
         {
             var result = new AjaxResult<string>();
             result.Code = 200;
 
-            var dbdevice = sqlSugarClient.Queryable<Device>().First(x => x.Id == dDevice.Id && !x.IsDeleted);
+            var dbindicators = sqlSugarClient.Queryable<Device>().First(x => x.Id == deleteEntityId.Id && !x.IsDeleted);
 
-            dbdevice.UpdateTime = DateTime.Now;
-            dbdevice.IsDeleted = true;
+            dbindicators.UpdateTime = DateTime.Now;
+            dbindicators.IsDeleted = true;
 
-            var count = sqlSugarClient.Updateable(dbdevice).ExecuteCommand();
+            var count = sqlSugarClient.Updateable(dbindicators).ExecuteCommand();
 
             if (count > 0)
             {
@@ -141,10 +150,5 @@ namespace SIV.Api.Controllers
 
             return result;
         }
-    }
-
-    public class DeleteDevice
-    {
-        public int Id { get; set; }
     }
 }

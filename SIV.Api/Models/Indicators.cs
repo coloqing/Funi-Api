@@ -1,25 +1,28 @@
-锘縰sing SqlSugar;
+using SqlSugar;
 
 namespace SIV.Api.Models
 {
-    [SugarTable("Device")]
-    public class Device
+    [SugarTable("Indicators")]
+    public class Indicators
     {
         [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
         public int Id { get; set; }
         /// <summary>
-        /// 璁惧鍚嶇О
+        /// 名称
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// 璁惧缂栫爜
+        /// 最大阈值
         /// </summary>
-        public string SN { get; set; }
+        public float Max { get; set; }
         /// <summary>
-        /// 鍏宠仈閮ㄤ欢id锛岄�楀彿鍒嗗壊
+        /// 最小阈值
         /// </summary>
-        public string ComponentIds { get; set; }
-        
+        public float Min { get; set; }
+        /// <summary>
+        /// 关联信号量代码
+        /// </summary>
+        public string SignalCode { get; set; } 
         public DateTime CreateTime { get; set; }
         public DateTime UpdateTime { get; set; }
         public bool IsDeleted { get; set; }
