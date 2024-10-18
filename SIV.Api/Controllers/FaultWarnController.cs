@@ -99,5 +99,79 @@ namespace SIV.Api.Controllers
             result.Data = q;
             return result;
         }
+
+        /// <summary>
+        /// 故障预警统计
+        /// </summary>       
+        /// <returns></returns>
+        [HttpGet("Number")]
+        public async Task<AjaxResult<List<FaultWarnCount>>> GetDataNum()
+        {
+            var q = await _db.Queryable<FaultOrWarn>().Where(x => !x.IsDeleted).ToListAsync();
+
+            var result = q
+            .GroupBy(item => new { item.CreateTime.Year, item.CreateTime.Month })
+            .Select(group => new FaultWarnCount
+            {
+                Time = $"{group.Key.Year}-{group.Key.Month}",          
+                WarnNum = group.Count(item => item.Type == 2),
+                FaultNum = group.Count(item => item.Type == 1)
+            })
+            .ToList();
+
+            return new AjaxResult<List<FaultWarnCount>>() 
+            {            
+                Data = result
+            };
+        }
+
+        /// <summary>
+        /// 历史预警分布统计
+        /// </summary>       
+        /// <returns></returns>
+        [HttpGet("Number/Cyc")]
+        public async Task<AjaxResult<object>> GetDataHistoryNum()
+        {
+            var q = await _db.Queryable<FaultOrWarn>().Where(x => !x.IsDeleted ).ToListAsync();
+            var dispose = q.Count(item => item.State == 0);
+            var nodispose = q.Count-dispose;
+
+            var result = new FaultWarnDisPercent
+            {
+                Dispose = (dispose/q.Count) * 100,
+                NoDispose = (nodispose/q.Count) * 100,
+            };
+
+            return new AjaxResult<object>()
+            {
+                Data = result
+            };        
+        }
+
+        /// <summary>
+        /// 故障预警统计Top10
+        /// </summary>       
+        /// <returns></returns>
+        [HttpGet("Number/Top10")]
+        public async Task<AjaxResult<List<FaultWarnTop10>>> GetDataTop10Num()
+        {
+            var q = await _db.Queryable<FaultOrWarn>().Where(x => !x.IsDeleted).ToListAsync();
+
+            var result = q
+            .GroupBy(item => new { item.TrainNumber })
+            .Select(group => new FaultWarnTop10
+            {
+                TrainNumber = group.Key.ToString(),
+                Count = group.Count()
+            })
+            .OrderByDescending(item => item.Count)
+            .Take(10)
+            .ToList();
+
+            return new AjaxResult<List<FaultWarnTop10>>()
+            {
+                Data = result
+            };
+        }
     }
 }
