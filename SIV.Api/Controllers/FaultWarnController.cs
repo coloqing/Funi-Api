@@ -24,7 +24,6 @@ namespace SIV.Api.Controllers
         private readonly ILogger<TrainController> _logger;
         private readonly IMapper _mapper;
 
-
         /// <summary>
         /// 
         /// </summary>
@@ -158,10 +157,10 @@ namespace SIV.Api.Controllers
             var q = await _db.Queryable<FaultOrWarn>().Where(x => !x.IsDeleted).ToListAsync();
 
             var result = q
-            .GroupBy(item => new { item.TrainNumber })
+            .GroupBy(item => item.TrainNumber )
             .Select(group => new FaultWarnTop10
             {
-                TrainNumber = group.Key.ToString(),
+                TrainNumber = group.Key,
                 Count = group.Count()
             })
             .OrderByDescending(item => item.Count)
