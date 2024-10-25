@@ -1,7 +1,7 @@
 namespace SIV.Api.Models
 {
     public class IndicatorsDTO
-    { 
+    {
         public int Id { get; set; }
         /// <summary>
         /// 名称
@@ -18,6 +18,9 @@ namespace SIV.Api.Models
         /// <summary>
         /// 关联信号量代码
         /// </summary>
-        public string SignalCode { get; set; } 
+        public string SignalCode { get; set; }
+
+        public object? Value { get; set; }
+        public int State { get; set; }
     }
 }

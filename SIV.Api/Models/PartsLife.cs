@@ -1,78 +1,71 @@
-ï»¿using SIV.Entity;
-using SIV.Util;
+using Newtonsoft.Json;
 using SqlSugar;
-using System.ComponentModel.DataAnnotations;
 
-namespace SIV.Api.DTO
+namespace SIV.Api.Models
 {
-    /// <summary>
-    /// éƒ¨ä»¶å¯¿å‘½
-    /// </summary>
-    [Map(typeof(PartsLife))]
-    public class PartsLifeDTO
-    {       
-        
-
+    [SugarTable("PartsLife")]
+    public class PartsLife
+    { 
         /// <summary>
-        /// çº¿è·¯
+        /// ÏßÂ·
         /// </summary>           
-        
+
         public string? XL { get; set; }
 
         /// <summary>
-        /// è½¦å·
+        /// ³µºÅ
         /// </summary>           
-        
+
         public string? CH { get; set; }
 
         /// <summary>
-        /// è½¦å¢
+        /// ³µÏá
         /// </summary>           
-        
+
         public string? CX { get; set; }
 
         /// <summary>
-        /// éƒ¨ä»¶ä½ç½®åç§°
+        /// ²¿¼şÎ»ÖÃÃû³Æ
         /// </summary>           
         public string? WZName { get; set; }
 
         /// <summary>
-        /// éƒ¨ä»¶åç§°
+        /// ²¿¼şÃû³Æ
         /// </summary>
 
         public string? Name { get; set; }
 
         /// <summary>
-        /// ç±»å‹
+        /// ÀàĞÍ
         /// </summary>           
         public string? TypeName { get; set; }
 
         /// <summary>
-        /// å·²è€—å¯¿å‘½/æ¬¡æ•°
+        /// ÒÑºÄÊÙÃü/´ÎÊı
         /// </summary>           
 
         public decimal? RunLife { get; set; }
 
         /// <summary>
-        /// é¢å®šå¯¿å‘½/æ¬¡æ•°
+        /// ¶î¶¨ÊÙÃü/´ÎÊı
         /// </summary>           
-        
+
         public decimal? RatedLife { get; set; }
 
         /// <summary>
-        /// å‰©ä½™å¯¿å‘½/æ¬¡æ•°
+        /// Ê£ÓàÊÙÃü/´ÎÊı
         /// </summary>           
-        
+
         public decimal? SurplusLife { get; set; }
 
         /// <summary>
-        /// ç™¾åˆ†æ¯”
+        /// °Ù·Ö±È
         /// </summary>           
 
         public decimal? Percent { get; set; }
 
         /// <summary>
-        /// ç™¾åˆ†æ¯”
+        /// °Ù·Ö±È
         /// </summary>           
 
         public string? Suggest { get; set; }
@@ -80,18 +73,50 @@ namespace SIV.Api.DTO
         public long Id { get; set; }
 
         /// <summary>
-        /// éƒ¨ä»¶ä½ç½®
+        /// ²¿¼şÎ»ÖÃ
         /// </summary>           
         public int? WZ { get; set; }
 
         /// <summary>
-        /// ç±»å‹
+        /// ÀàĞÍ
         /// </summary>           
 
         public string? Type { get; set; }
+
         public string FaultCode { get; set; }
         public string Code { get; set; }
         public string FarecastCode { get; set; }
-        public DateTime UpdateTime { get; set; }
+
+        /// <summary>
+        /// Desc:´´½¨Ê±¼ä
+        /// Default:DateTime.Now
+        /// Nullable:True
+        /// </summary>           
+        [SugarColumn(ColumnDescription = "´´½¨Ê±¼ä")]
+        public DateTime? createtime { get; set; }
+
+        /// <summary>
+        /// Desc:´´½¨ÈË
+        /// Default:
+        /// Nullable:True
+        /// </summary>           
+        [SugarColumn(ColumnDescription = "´´½¨ÈË", Length = 50)]
+        public string? createuserid { get; set; }
+
+        /// <summary>
+        /// Desc:ĞŞ¸ÄÊ±¼ä
+        /// Default:
+        /// Nullable:True
+        /// </summary>           
+        [SugarColumn(ColumnDescription = "ĞŞ¸ÄÊ±¼ä")]
+        public DateTime? updatetime { get; set; }
+
+        /// <summary>
+        /// Desc:ĞŞ¸ÄÈË
+        /// Default:
+        /// Nullable:True
+        /// </summary>           
+        [SugarColumn(ColumnDescription = "ĞŞ¸ÄÈË", Length = 50)]
+        public string? updateuserid { get; set; }
     }
 }

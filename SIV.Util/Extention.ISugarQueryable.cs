@@ -70,6 +70,6 @@ namespace SIV.Util
                 Code = 200,
                 Message = "查询成功"
             };         
-        }       
+        }
     }
 }

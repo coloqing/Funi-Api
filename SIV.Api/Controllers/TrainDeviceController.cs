@@ -6,6 +6,8 @@ using SIV.Util;
 using Util.DTO;
 using SIV.Api.DTO;
 using Aspose.Cells.Drawing;
+using SIV.Entity;
+using System.Reflection;
 
 namespace SIV.Api.Controllers
 {
@@ -107,6 +109,15 @@ namespace SIV.Api.Controllers
 
             var indicators = sqlSugarClient.Queryable<Indicators>().Where(x => !x.IsDeleted && indicatorIds.Contains(x.Id)).ToList();
 
+            var dv = rTrainDevice.FirstOrDefault();
+            TB_PARSING_DATAS signalVal = null;
+            if (dv != null)
+            {
+                var name = sqlSugarClient.SplitHelper<TB_PARSING_DATAS>().GetTableName(DateTime.Now.Date);//根据时间获取表名
+
+                signalVal = sqlSugarClient.Queryable<TB_PARSING_DATAS>().Where(x => x.LcId == dv.TrainId).SplitTable(tabs => tabs.InTableNames(name)).OrderByDescending(x => x.CreateTime).First();
+            }
+
             foreach (var device in devices)
             {
                 var deviceDM = new DeviceDM
@@ -115,7 +126,8 @@ namespace SIV.Api.Controllers
                     Name = device.Name,
                     SN = device.SN,
                     Components = new List<ComponentDM>(),
-                    CoachType = rTrainDevice.First(x => x.DeviceId == device.Id).CoachType
+                    CoachType = rTrainDevice.First(x => x.DeviceId == device.Id).CoachType,
+                    SignalValue = signalVal,
                 };
 
                 // 设备所有的部件
@@ -126,33 +138,61 @@ namespace SIV.Api.Controllers
                         Id = component.Id,
                         Name = component.Name,
                         SN = component.SN,
-                        Indicators = new()
+                        Indicators = new(),
+                        SignalCode = component.SignalCode,
+                        SignalValue = GetPropertyValue(signalVal, component.SignalCode)
                     };
 
                     //部件所有的指标
-                    foreach (var indecator in indicators.Where(x => component.IndicatorsIds.Split(",").ToList().ConvertAll(x => int.Parse(x)).Contains(x.Id)))
+                    foreach (var indicator in indicators.Where(x => component.IndicatorsIds.Split(",").ToList().ConvertAll(x => int.Parse(x)).Contains(x.Id)))
                     {
+                        var v = float.Parse(GetPropertyValue(signalVal, indicator.SignalCode).ToString());
                         var indcDTO = new IndicatorsDTO
                         {
-                            Name = indecator.Name,
-                            Id = indecator.Id,
-                            Max = indecator.Max,
-                            Min = indecator.Min,
-                            SignalCode = indecator.SignalCode
+                            Name = indicator.Name,
+                            Id = indicator.Id,
+                            Max = indicator.Max,
+                            Min = indicator.Min,
+                            SignalCode = indicator.SignalCode,
+                            Value = v,
+                            State = (v >= indicator.Min && v <= indicator.Max) ? 1 : 0,
                         };
 
                         cdm.Indicators.Add(indcDTO);
                     }
 
                     deviceDM.Components.Add(cdm);
-
                 }
 
                 deviceSignalDTO.DeviceDM.Add(deviceDM);
             }
 
+            result.Success = true;
             result.Data = deviceSignalDTO;
             return result;
+        }
+
+        [NonAction]
+        static object? GetPropertyValue(object? obj, string propertyName)
+        {
+            if (obj == null)
+                return null;
+
+            // 获取对象的类型
+            Type type = obj.GetType();
+
+            // 获取对应的属性信息
+            PropertyInfo propInfo = type.GetProperty(propertyName);
+
+            if (propInfo != null)
+            {
+                // 获取属性的值
+                return propInfo.GetValue(obj);
+            }
+            else
+            {
+                throw new ArgumentException($"Property '{propertyName}' not found on type '{type.Name}'");
+            }
         }
 
         /// <summary>
@@ -275,6 +315,8 @@ namespace SIV.Api.Controllers
         public string CoachType { get; set; }
 
         public List<ComponentDM> Components { get; set; }
+
+        public TB_PARSING_DATAS? SignalValue { get; set; }
     }
 
     public class ComponentDM
@@ -290,6 +332,14 @@ namespace SIV.Api.Controllers
         public string Name { get; set; }
 
         public List<IndicatorsDTO> Indicators { get; set; }
+        /// <summary>
+        /// 信号量代码
+        /// </summary>
+        public string SignalCode { get; set; }
+        /// <summary>
+        /// 信号量值
+        /// </summary>
+        public object? SignalValue { get; set; }
     }
 
 }

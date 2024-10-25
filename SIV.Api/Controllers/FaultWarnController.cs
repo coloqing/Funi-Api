@@ -5,7 +5,6 @@ using SIV.Entity.Tables;
 using SIV.Entity;
 using Util.DTO;
 using AutoMapper;
-using SIV.Controllers;
 using SqlSugar;
 using SIV.Util;
 using System.DirectoryServices.Protocols;
@@ -171,6 +170,42 @@ namespace SIV.Api.Controllers
             {
                 Data = result
             };
+        }
+
+        [HttpGet("excel")]
+        public async Task<IActionResult> Export(string ids)
+        { 
+            try
+            {
+                string rptTitle = "故障预警导出";
+                ExcelUtil.Instance().FileName = $"{rptTitle}.xlsx";
+                ExcelUtil.Instance().AliasDataSource.Clear();
+
+                var idsarr = ids.Split(',').ToList().ConvertAll(x => long.Parse(x));
+
+                var dataTable = await _db.Queryable<FaultOrWarn>().Where(x => !x.IsDeleted && idsarr.Contains(x.Id)).ToDataTableAsync();
+               
+                dataTable.TableName = "Data";
+                // 调用 Save 方法获取 MemoryStream  
+                using (var stream = ExcelUtil.Instance().Save(dataTable, "故障预警导出模板"))
+                {
+
+                    byte[] excelBytes = new byte[stream.Length];
+                    stream.Read(excelBytes, 0, excelBytes.Length);
+
+                    // 设置文件名  
+                    string fileName = rptTitle + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
+
+                    // 返回文件给客户端  
+                    return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                // 返回一个错误响应  
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the Excel file.");
+            }
         }
     }
 }

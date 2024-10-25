@@ -330,32 +330,33 @@ namespace SIV.Util
             // 加载 Workbook  
             string fullPath = Path.Combine(_templateFilePath, templateName);
             Workbook workbook = new Workbook(fullPath);
+            workbook.Settings.MemorySetting = MemorySetting.MemoryPreference;
 
             // 创建 WorkbookDesigner 并设置 Workbook  
             WorkbookDesigner designer = new WorkbookDesigner(workbook);
 
-            foreach (DataRow row in data.Rows)
-            {
-                foreach (DataColumn column in data.Columns)
-                {
-                    if (row[column] == DBNull.Value) // 注意检查 DBNull.Value  
-                    {
-                        if (column.DataType == typeof(int) || column.DataType == typeof(long) || column.DataType == typeof(Int64) || column.DataType == typeof(double))
-                        {
-                            row[column] = 0; // 对于整数类型的列，设置为0  
-                        }
-                        else if (column.DataType == typeof(DateTime))
-                        {
-                            row[column] = DBNull.Value; // 或者设置为 DateTime.MinValue，取决于你的需求  
-                                                        // row[column] = DateTime.MinValue; // 如果你确实需要一个默认值而不是null  
-                        }
-                        else
-                        {
-                            row[column] = ""; // 对于其他类型，设置为空字符串（但请注意，这可能不适用于所有情况）  
-                        }   
-                    }
-                }
-            }
+            //foreach (DataRow row in data.Rows)
+            //{
+            //    foreach (DataColumn column in data.Columns)
+            //    {
+            //        if (row[column] == DBNull.Value) // 注意检查 DBNull.Value  
+            //        {
+            //            if (column.DataType == typeof(int) || column.DataType == typeof(long) || column.DataType == typeof(Int64) || column.DataType == typeof(double))
+            //            {
+            //                row[column] = 0; // 对于整数类型的列，设置为0  
+            //            }
+            //            else if (column.DataType == typeof(DateTime))
+            //            {
+            //                row[column] = DBNull.Value; // 或者设置为 DateTime.MinValue，取决于你的需求  
+            //                                            // row[column] = DateTime.MinValue; // 如果你确实需要一个默认值而不是null  
+            //            }
+            //            else
+            //            {
+            //                row[column] = ""; // 对于其他类型，设置为空字符串（但请注意，这可能不适用于所有情况）  
+            //            }   
+            //        }
+            //    }
+            //}
 
             // 设置数据源  
             designer.SetDataSource(data); // 假设您使用 "MyDataTable" 作为数据源别名  

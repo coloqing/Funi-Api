@@ -30,6 +30,10 @@ namespace SIV.Api.Models
         /// 最小值
         /// </summary>
         public float Min { get; set; }
+        /// <summary>
+        /// 单位
+        /// </summary>
+        public string? Units { get; set; }
         [JsonIgnore]
         public DateTime CreateTime { get; set; } = DateTime.Now;
         [JsonIgnore]

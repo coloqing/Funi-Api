@@ -1,12 +1,7 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SIV.Api.DTO;
-using SIV.Controllers;
-using SIV.Entity;
 using SqlSugar;
 using System.Reflection;
-using Util.DTO;
 
 namespace SIV.Api.Controllers
 {

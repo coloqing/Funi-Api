@@ -27,6 +27,10 @@ namespace SIV.Api.Models
         /// 关联性能指标id,逗号分割
         /// </summary>
         public string IndicatorsIds { get; set; }
+        /// <summary>
+        /// 信号量代码
+        /// </summary>
+        public string SignalCode { get; set; }
         public DateTime CreateTime { get; set; }
         public DateTime UpdateTime { get; set; }
         public bool IsDeleted { get; set; }
