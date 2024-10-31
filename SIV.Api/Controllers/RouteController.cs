@@ -46,13 +46,11 @@ namespace SIV.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("Structure")]
-        public AjaxResult<object> GetStructure(int? roleId = default)
+        public AjaxResult<object> GetStructure()
         {
             var result = new AjaxResult<object>();
             result.Code = 200;
             var query = sqlSugarClient.Queryable<Models.Route>().Where(x => !x.IsDeleted);
-            query.WhereIF(roleId != default, x => x.RoleId == roleId);
-
             var data = query.ToList();
 
             var routeRoots = data.Where(x => x.ParentId == 0);
@@ -63,6 +61,7 @@ namespace SIV.Api.Controllers
             {
                 dynamic root = new ExpandoObject();
                 root.Id = item.Id;
+                root.ParentId = item.ParentId; 
                 root.Path = item.Path;
                 root.Name = item.Name;
                 root.Component = item.Component;
@@ -71,7 +70,8 @@ namespace SIV.Api.Controllers
                 root.Meta = new
                 {
                     Title = item.Title,
-                    Icon = item.Icon
+                    Icon = item.Icon,
+                    Roles = item.Roles.Split(',')
                 };
 
                 FindChildrens(ref root, data);
@@ -88,11 +88,11 @@ namespace SIV.Api.Controllers
         public void FindChildrens(ref dynamic root, List<Models.Route> list)
         {
             var id = root.Id;
-            Console.WriteLine(id);
             foreach (var item in list.Where(x => x.ParentId == id))
             {
                 dynamic child = new ExpandoObject();
                 child.Id = item.Id;
+                child.ParentId = item.ParentId;
                 child.Path = item.Path;
                 child.Name = item.Name;
                 child.Component = item.Component;
@@ -101,7 +101,8 @@ namespace SIV.Api.Controllers
                 child.Meta = new
                 {
                     Title = item.Title,
-                    Icon = item.Icon
+                    Icon = item.Icon,
+                    Roles = item.Roles.Split(',')
                 };
 
                 FindChildrens(ref child, list);

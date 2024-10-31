@@ -29,9 +29,12 @@ namespace SIV.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<PageResult<DeviceDTO>> Get(int? pageIndex = 1, int? pageRow = 10)
+        public async Task<PageResult<DeviceDTO>> Get(string? name = default ,string? SN = default ,int? pageIndex = 1, int? pageRow = 10)
         { 
             var query = sqlSugarClient.Queryable<Device>().Where(x => !x.IsDeleted);
+            query.WhereIF(name != default,x=>x.Name == name);
+            query.WhereIF(SN!= default,x=>x.SN == SN);
+
             var result = await query.GetPageResultAsync("createTime", "desc", pageIndex.Value, pageRow.Value);
 
             return new PageResult<DeviceDTO>

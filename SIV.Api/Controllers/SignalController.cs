@@ -29,9 +29,14 @@ namespace SIV.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<PageResult<SignalDTO>> Get(int? pageIndex = 1, int? pageRow = 10)
+        public async Task<PageResult<SignalDTO>> Get(string? name = default, string? code = default, string? type = default, int? pageIndex = 1, int? pageRow = 10)
         {
             var query = sqlSugarClient.Queryable<Signal>().Where(x => !x.IsDeleted);
+
+            query.WhereIF(name != default, x => x.Name == name);
+            query.WhereIF(code != default, x => x.Code == code);
+            query.WhereIF(type != default, x => x.Type == type);
+
             var result = await query.GetPageResultAsync("createTime", "desc", pageIndex.Value, pageRow.Value);
 
             return new PageResult<SignalDTO>
@@ -121,7 +126,7 @@ namespace SIV.Api.Controllers
             var result = new AjaxResult<string>();
             result.Code = 200;
 
-            var dbsignal = sqlSugarClient.Queryable<Device>().First(x => x.Id == deleteEntityId.Id && !x.IsDeleted);
+            var dbsignal = sqlSugarClient.Queryable<Signal>().First(x => x.Id == deleteEntityId.Id && !x.IsDeleted);
 
             dbsignal.UpdateTime = DateTime.Now;
             dbsignal.IsDeleted = true;

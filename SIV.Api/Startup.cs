@@ -29,7 +29,7 @@ namespace SIV.Api
             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 //配置序列化时时间格式为yyyy-MM-dd HH:mm:ss
-                options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss.fff";
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             });
             //添加数据库服务

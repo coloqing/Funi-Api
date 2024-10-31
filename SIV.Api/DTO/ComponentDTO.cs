@@ -11,14 +11,14 @@ namespace SIV.Api.Models
         /// 名称
         /// </summary>
         public string Name { get; set; }
-        /// <summary>
-        /// 关联设备Id
-        /// </summary>
-        public int DeviceId { get; set; }
-        /// <summary>
-        /// 关联设备编号
-        /// </summary>
-        public string DeviceSN { get; set; }
+        ///// <summary>
+        ///// 关联设备Id
+        ///// </summary>
+        //public int DeviceId { get; set; }
+        ///// <summary>
+        ///// 关联设备编号
+        ///// </summary>
+        //public string DeviceSN { get; set; }
         /// <summary>
         /// 关联性能指标id,逗号分割
         /// </summary>

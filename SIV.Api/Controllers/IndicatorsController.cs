@@ -6,6 +6,7 @@ using SIV.Api.Models;
 using SqlSugar;
 using SIV.Util;
 using Util.DTO;
+using Aspose.Cells;
 
 namespace SIV.Api.Controllers
 {
@@ -38,9 +39,10 @@ namespace SIV.Api.Controllers
         /// <param name="pageRow"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<PageResult<IndicatorsDTO>> Get(int? pageIndex = 1, int? pageRow = 10)
+        public async Task<PageResult<IndicatorsDTO>> Get(string? name = default,int? pageIndex = 1, int? pageRow = 10)
         {
             var query = sqlSugarClient.Queryable<Indicators>().Where(x => !x.IsDeleted);
+            query.WhereIF(name != default, x => x.Name == name); 
             var result = await query.GetPageResultAsync("createTime", "desc", pageIndex.Value, pageRow.Value);
 
             return new PageResult<IndicatorsDTO>
@@ -130,7 +132,7 @@ namespace SIV.Api.Controllers
             var result = new AjaxResult<string>();
             result.Code = 200;
 
-            var dbindicators = sqlSugarClient.Queryable<Device>().First(x => x.Id == deleteEntityId.Id && !x.IsDeleted);
+            var dbindicators = sqlSugarClient.Queryable<Indicators>().First(x => x.Id == deleteEntityId.Id && !x.IsDeleted);
 
             dbindicators.UpdateTime = DateTime.Now;
             dbindicators.IsDeleted = true;

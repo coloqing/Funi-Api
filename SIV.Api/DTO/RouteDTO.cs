@@ -8,7 +8,7 @@ namespace SIV.Api.DTO
         /// <summary>
         /// 角色Id
         /// </summary>
-        public int RoleId { get; set; }
+        public string Roles { get; set; }
         public string Name { get; set; }
         /// <summary>
         /// 路由路径

@@ -38,9 +38,11 @@ namespace SIV.Api.Controllers
         /// <param name="pageRow"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<PageResult<ComponentDTO>> Get(int? pageIndex = 1, int? pageRow = 10)
+        public async Task<PageResult<ComponentDTO>> Get(string? name = default, string? SN = default, int? pageIndex = 1, int? pageRow = 10)
         {
             var query = sqlSugarClient.Queryable<Component>().Where(x => !x.IsDeleted);
+            query.WhereIF(name != default, x => x.Name == name);
+            query.WhereIF(SN != default, x => x.SN == SN);
             var result = await query.GetPageResultAsync("createTime", "desc", pageIndex.Value, pageRow.Value);
 
             return new PageResult<ComponentDTO>
@@ -130,7 +132,7 @@ namespace SIV.Api.Controllers
             var result = new AjaxResult<string>();
             result.Code = 200;
 
-            var dbcomponent = sqlSugarClient.Queryable<Device>().First(x => x.Id == deleteEntityId.Id && !x.IsDeleted);
+            var dbcomponent = sqlSugarClient.Queryable<Component>().First(x => x.Id == deleteEntityId.Id && !x.IsDeleted);
 
             dbcomponent.UpdateTime = DateTime.Now;
             dbcomponent.IsDeleted = true;

@@ -8,6 +8,9 @@ using SIV.Api.DTO;
 using Aspose.Cells.Drawing;
 using SIV.Entity;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using Aspose.Cells;
+using static Dm.net.buffer.ByteArrayBuffer;
 
 namespace SIV.Api.Controllers
 {
@@ -38,9 +41,13 @@ namespace SIV.Api.Controllers
         /// <param name="pageRow"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<PageResult<R_Train_DeviceDTO>> Get(int? pageIndex = 1, int? pageRow = 10)
+        public async Task<PageResult<R_Train_DeviceDTO>> Get(string? trainNum = default, string? deviceSN = default, int? pageIndex = 1, int? pageRow = 10)
         {
             var query = sqlSugarClient.Queryable<R_Train_Device>().Where(x => !x.IsDeleted);
+
+            query.WhereIF(trainNum != default, x => x.TrainNum == trainNum);
+            query.WhereIF(deviceSN != default, x => x.DeviceSN == deviceSN);
+
             var result = await query.GetPageResultAsync("createTime", "desc", pageIndex.Value, pageRow.Value);
 
             return new PageResult<R_Train_DeviceDTO>
@@ -272,7 +279,7 @@ namespace SIV.Api.Controllers
             var result = new AjaxResult<string>();
             result.Code = 200;
 
-            var dbtrainDevice = sqlSugarClient.Queryable<Device>().First(x => x.Id == deleteEntityId.Id && !x.IsDeleted);
+            var dbtrainDevice = sqlSugarClient.Queryable<R_Train_Device>().First(x => x.Id == deleteEntityId.Id && !x.IsDeleted);
 
             dbtrainDevice.UpdateTime = DateTime.Now;
             dbtrainDevice.IsDeleted = true;

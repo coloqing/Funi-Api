@@ -13,4 +13,11 @@ namespace SIV.Api.Authorization.Models
         public DateTime UpdateTime { get; set; }
         public bool IsDeleted { get; set; }
     }
+
+    public class ApiModelDTO
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Path { get; set; } 
+    }
 }
