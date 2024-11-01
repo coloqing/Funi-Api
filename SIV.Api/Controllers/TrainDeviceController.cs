@@ -27,8 +27,10 @@ namespace SIV.Api.Controllers
 
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<R_Train_DeviceDTO, R_Train_Device>().ReverseMap().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
-                cfg.CreateMap<Device, DeviceDTO>().ReverseMap().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+                cfg.CreateMap<R_Train_DeviceDTO, R_Train_Device>().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+                cfg.CreateMap<R_Train_Device, R_Train_DeviceDTO>();
+                cfg.CreateMap<DeviceDTO, Device>().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+                cfg.CreateMap<Device, DeviceDTO>();
             }
             );
             mapper = config.CreateMapper();

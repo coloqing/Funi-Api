@@ -22,7 +22,8 @@ namespace SIV.Api.Controllers
             this.sqlSugarClient = sqlSugarClient; 
             var config = new MapperConfiguration(cfg =>
                 {
-                    cfg.CreateMap<ConfigDTO, Config>().ReverseMap().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+                    cfg.CreateMap<ConfigDTO, Config>().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+                    cfg.CreateMap<Config, ConfigDTO>();
                 }
             );
             mapper = config.CreateMapper();
@@ -96,13 +97,13 @@ namespace SIV.Api.Controllers
             var result = new AjaxResult<string>();
             result.Code = 200;
 
-            var dbcocach = sqlSugarClient.Queryable<Config>().First(x => x.Id == config.Id && !x.IsDeleted);
+            var dbconfig = sqlSugarClient.Queryable<Config>().First(x => x.Id == config.Id && !x.IsDeleted);
 
-            mapper.Map(config, dbcocach);
+            mapper.Map(config, dbconfig);
 
-            dbcocach.UpdateTime = DateTime.Now;
+            dbconfig.UpdateTime = DateTime.Now;
 
-            var count = sqlSugarClient.Updateable(dbcocach).ExecuteCommand();
+            var count = sqlSugarClient.Updateable(dbconfig).ExecuteCommand();
 
             if (count > 0)
             {

@@ -25,7 +25,8 @@ namespace SIV.Api.Controllers
 
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<ComponentDTO, Component>().ReverseMap().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+                cfg.CreateMap<ComponentDTO, Component>().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+                cfg.CreateMap<Component, ComponentDTO>();
             }
             );
             mapper = config.CreateMapper();

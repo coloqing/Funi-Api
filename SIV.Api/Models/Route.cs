@@ -20,7 +20,7 @@ namespace SIV.Api.Models
         /// 组件名称
         /// </summary>
         public string Component { get; set; }
-        public int ParentId { get; set; }
+        public int? ParentId { get; set; }
         public int? Order { get; set; }
         public string Title { get; set; }
         public string Icon { get; set; }

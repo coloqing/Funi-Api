@@ -22,7 +22,8 @@ namespace SIV.Api.Controllers
 
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<SignalDTO, Signal>().ReverseMap().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+                cfg.CreateMap<SignalDTO, Signal>().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+                cfg.CreateMap<Signal, SignalDTO>();
             }
             );
             mapper = config.CreateMapper();

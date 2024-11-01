@@ -59,7 +59,7 @@ namespace SIV.Api.Controllers
         /// <param name="endTime">结束时间</param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<PageResult<FaultOrWarn>> GetData(int? lineId = default, string? trainNum = default, int? state = default, string? alarmName = default, int? alarmType = default, string? sortFile = "CreateTime", string? sortType = "desc", int pageIndex = 1, int pageRow = 7,DateTime? startTime = default,DateTime? endTime = default)
+        public async Task<PageResult<FaultOrWarn>> GetData(int? lineId = default, string? trainNum = default, int? state = default, string? alarmName = default, int? alarmType = default, string? sortFile = "CreateTime", string? sortType = "desc", int pageIndex = 1, int pageRow = 7, DateTime? startTime = default, DateTime? endTime = default)
         {
             var where = Expressionable.Create<FaultOrWarn>().And(x => !x.IsDeleted);
 
@@ -67,7 +67,7 @@ namespace SIV.Api.Controllers
             where.AndIF(trainNum != default, x => x.TrainNumber == trainNum);
             where.AndIF(state != default, x => x.State == state);
             where.AndIF(alarmName != default, x => x.Name == alarmName);
-            where.AndIF(alarmType != default, x => x.Grade == alarmType); 
+            where.AndIF(alarmType != default, x => x.Grade == alarmType);
             where.AndIF(startTime != default, x => x.CreateTime >= startTime);
             where.AndIF(endTime != default, x => x.EndTime <= endTime);
 
@@ -111,14 +111,14 @@ namespace SIV.Api.Controllers
             .GroupBy(item => new { item.CreateTime.Year, item.CreateTime.Month })
             .Select(group => new FaultWarnCount
             {
-                Time = $"{group.Key.Year}-{group.Key.Month}",          
+                Time = $"{group.Key.Year}-{group.Key.Month}",
                 WarnNum = group.Count(item => item.Type == 2),
                 FaultNum = group.Count(item => item.Type == 1)
             })
             .ToList();
 
-            return new AjaxResult<List<FaultWarnCount>>() 
-            {            
+            return new AjaxResult<List<FaultWarnCount>>()
+            {
                 Data = result
             };
         }
@@ -130,20 +130,20 @@ namespace SIV.Api.Controllers
         [HttpGet("Number/Cyc")]
         public async Task<AjaxResult<object>> GetDataHistoryNum()
         {
-            var q = await _db.Queryable<FaultOrWarn>().Where(x => !x.IsDeleted ).ToListAsync();
-            var dispose = q.Count(item => item.State == 0);
-            var nodispose = q.Count-dispose;
+            var q = await _db.Queryable<FaultOrWarn>().Where(x => !x.IsDeleted).ToListAsync();
+            var dispose = float.Parse(q.Count(item => item.State == 0).ToString());
+            var nodispose = float.Parse((q.Count - dispose).ToString());
 
             var result = new FaultWarnDisPercent
             {
-                Dispose = (dispose/q.Count) * 100,
-                NoDispose = (nodispose/q.Count) * 100,
+                Dispose = (dispose / q.Count) * 100,
+                NoDispose = (nodispose / q.Count) * 100,
             };
 
             return new AjaxResult<object>()
             {
                 Data = result
-            };        
+            };
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace SIV.Api.Controllers
             var q = await _db.Queryable<FaultOrWarn>().Where(x => !x.IsDeleted).ToListAsync();
 
             var result = q
-            .GroupBy(item => item.TrainNumber )
+            .GroupBy(item => item.TrainNumber)
             .Select(group => new FaultWarnTop10
             {
                 TrainNumber = group.Key,
@@ -174,7 +174,7 @@ namespace SIV.Api.Controllers
 
         [HttpGet("excel")]
         public async Task<IActionResult> Export(string ids)
-        { 
+        {
             try
             {
                 string rptTitle = "故障预警导出";
@@ -184,7 +184,7 @@ namespace SIV.Api.Controllers
                 var idsarr = ids.Split(',').ToList().ConvertAll(x => long.Parse(x));
 
                 var dataTable = await _db.Queryable<FaultOrWarn>().Where(x => !x.IsDeleted && idsarr.Contains(x.Id)).ToDataTableAsync();
-               
+
                 dataTable.TableName = "Data";
                 // 调用 Save 方法获取 MemoryStream  
                 using (var stream = ExcelUtil.Instance().Save(dataTable, "故障预警导出模板"))

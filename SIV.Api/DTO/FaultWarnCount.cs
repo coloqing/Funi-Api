@@ -31,12 +31,12 @@
         /// <summary>
         /// 已处置率
         /// </summary>
-        public decimal Dispose { get; set; }
+        public float Dispose { get; set; }
 
         /// <summary>
         /// 未处置lv
         /// </summary>
-        public decimal NoDispose { get; set; }
+        public float NoDispose { get; set; }
 
     }
 

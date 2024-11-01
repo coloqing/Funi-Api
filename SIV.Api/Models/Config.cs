@@ -10,6 +10,7 @@ namespace SIV.Api.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public string LineName { get; set; }
+        public string Data { get; set; }
         [JsonIgnore]
         public DateTime CreateTime { get; set; } = DateTime.Now;
         [JsonIgnore]

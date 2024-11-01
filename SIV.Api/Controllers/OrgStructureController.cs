@@ -23,7 +23,8 @@ namespace SIV.Api.Controllers
             this.sqlSugarClient = sqlSugarClient;
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<OrgStructureDTO, OrgStructure>().ReverseMap().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+                cfg.CreateMap<OrgStructureDTO, OrgStructure>().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+                cfg.CreateMap<OrgStructure, OrgStructureDTO>();
             }
            );
             mapper = config.CreateMapper();

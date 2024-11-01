@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using SIV.Api.DTO;
 using SIV.Api.Models;
 using SqlSugar;
@@ -22,7 +23,9 @@ namespace SIV.Api.Controllers
 
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<RouteDTO, Models.Route>().ReverseMap().ForAllMembers(opt => opt.Condition((src, dest, svalue, dvalue) => svalue != null));
+                cfg.CreateMap<RouteDTO, Models.Route>().ForAllMembers(opt => opt.Condition((src, dest, svalue) => { 
+                    return svalue != null; }));
+                cfg.CreateMap<Models.Route, RouteDTO>(); 
             }
 );
             mapper = config.CreateMapper();
@@ -61,7 +64,7 @@ namespace SIV.Api.Controllers
             {
                 dynamic root = new ExpandoObject();
                 root.Id = item.Id;
-                root.ParentId = item.ParentId; 
+                root.ParentId = item.ParentId;
                 root.Path = item.Path;
                 root.Name = item.Name;
                 root.Component = item.Component;
@@ -70,8 +73,7 @@ namespace SIV.Api.Controllers
                 root.Meta = new
                 {
                     Title = item.Title,
-                    Icon = item.Icon,
-                    Roles = item.Roles.Split(',')
+                    Icon = item.Icon
                 };
 
                 FindChildrens(ref root, data);
